@@ -9,77 +9,166 @@
  * */
 (function( $ ) {
 	var methods = {
-		aboveTheViewport: function( treshold ) {
-			var _scrollable = $( this ).closest( ':have-scroll' );
-			var _treshold = typeof treshold == 'string' ? parseInt( treshold, 10 ) : 0;
-			var _fromTop = _scrollable.get( 0 ).tagName == "BODY" ? $( this ).offset().top : $( this ).position().top;
-			var _marginTop = parseInt( $( this ).css( 'margin-top' ), 10 );
-			var _marginBottom = parseInt( $( this ).css( 'margin-top' ), 10 );
+		getElementPosition: function() {
+			var _scrollableParent = $( this ).closest( ':have-scroll' );
+			var _topBorder = _scrollableParent.get( 0 ).tagName == "BODY" ? $( this ).offset().top : $( this ).position().top;
+			var _leftBorder = _scrollableParent.get( 0 ).tagName == "BODY" ? $( this ).offset().left : $( this ).position().left;
 
-			return _fromTop + _marginTop - _marginBottom + _treshold < 0;
+			return {
+				"elemTopBorder": _topBorder,
+				"elemBottomBorder": _topBorder + $( this ).height(),
+				"elemLeftBorder": _leftBorder,
+				"elemRightBorder": _leftBorder + $( this ).width(),
+				"elemMargin": [
+					parseInt( $( this ).css( 'margin-top' ), 10 ),
+					parseInt( $( this ).css( 'margin-right' ), 10 ),
+					parseInt( $( this ).css( 'margin-bottom' ), 10 ),
+					parseInt( $( this ).css( 'margin-left' ), 10 )
+				],
+				"viewport": _scrollableParent,
+				"viewportHeight": _scrollableParent.height(),
+				"viewportWidth": _scrollableParent.width()
+			};
 		},
-		belowTheViewport: function( treshold ) {
-			var _scrollable = $( this ).closest( ':have-scroll' );
-			var _treshold = typeof treshold == 'string' ? parseInt( treshold, 10 ) : 0;
-			var _bottomBorder = _scrollable.get( 0 ).tagName == "BODY" ? $( window ).height() : _scrollable.height();
-			var _fromTop = _scrollable.get( 0 ).tagName == "BODY" ? $( this ).offset().top + $( this ).height() : $( this ).position().top + $( this ).height();
-			var _marginTop = parseInt( $( this ).css( 'margin-top' ), 10 );
-			var _marginBottom = parseInt( $( this ).css( 'margin-top' ), 10 );
+		aboveTheViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
-			return _bottomBorder <= _fromTop + _marginTop - _marginBottom - _treshold;
-		},
-		leftOfViewport: function( treshold ) {
-			var _scrollable = $( this ).closest( ':have-scroll' );
-			var _treshold = typeof treshold == 'string' ? parseInt( treshold, 10 ) : 0;
-			var _fromLeft = _scrollable.get( 0 ).tagName == "BODY" ? $( this ).offset().left : $( this ).position().left;
-			var _marginLeft = parseInt( $( this ).css( 'margin-left' ), 10 );
-			var _marginRight = parseInt( $( this ).css( 'margin-right' ), 10 );
+			var pos = methods['getElementPosition'].call( this );
 
-			return _fromLeft + _marginLeft - _marginRight + _treshold < 0;
+			return pos.elemTopBorder + pos.elemMargin[0] - pos.elemMargin[2] - _threshold < 0;
 		},
-		rightOfViewport: function( treshold ) {
-			var _scrollable = $( this ).closest( ':have-scroll' );
-			var _treshold = typeof treshold == 'string' ? parseInt( treshold, 10 ) : 0;
-			var _rightBorder = _scrollable.get( 0 ).tagName == "BODY" ? $( window ).width() : _scrollable.width();
-			var _fromLeft = _scrollable.get( 0 ).tagName == "BODY" ? $( this ).offset().left + $( this ).width() : $( this ).position().left + $( this ).width();
-			var _marginLeft = parseInt( $( this ).css( 'margin-left' ), 10 );
-			var _marginRight = parseInt( $( this ).css( 'margin-right' ), 10 );
+		partlyAboveTheViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
-			return _rightBorder <= _fromLeft + _marginLeft - _marginRight - _treshold;
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.elemTopBorder + pos.elemMargin[0] - pos.elemMargin[2] - _threshold < 0
+				&& pos.elemBottomBorder + pos.elemMargin[0] + pos.elemMargin[2] - _threshold >= 0;
 		},
-		inViewport: function( treshold ) {
-			return !methods['aboveTheViewport'].call( this, treshold )
-				&& !methods['belowTheViewport'].call( this, treshold )
-				&& !methods['leftOfViewport'].call( this, treshold )
-				&& !methods['rightOfViewport'].call( this, treshold );
+		belowTheViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.viewportHeight <= pos.elemTopBorder + $( this ).height() + pos.elemMargin[0] - pos.elemMargin[2] + _threshold;
 		},
-		getPosition: function( treshold, mixed ) {
-			var _above = methods['aboveTheViewport'].call( this, treshold );
-			var _below = methods['belowTheViewport'].call( this, treshold );
-			var _left = methods['leftOfViewport'].call( this, treshold );
-			var _right = methods['rightOfViewport'].call( this, treshold );
-			var state = null;
+		partlyBelowTheViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.viewportHeight <= pos.elemBottomBorder + pos.elemMargin[0] - pos.elemMargin[2] + _threshold
+				&& pos.viewportHeight > pos.elemTopBorder + pos.elemMargin[0] - pos.elemMargin[2] - _threshold;
+		},
+		leftOfViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.elemLeftBorder + pos.elemMargin[3] - pos.elemMargin[1] - _threshold < 0;
+		},
+		partlyLeftOfViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.elemLeftBorder + pos.elemMargin[3] - pos.elemMargin[1] - _threshold < 0
+				&& pos.elemRightBorder + pos.elemMargin[3] - pos.elemMargin[1] + _threshold >= 0;
+		},
+		rightOfViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.viewportWidth <= pos.elemRightBorder + pos.elemMargin[3] - pos.elemMargin[1] + _threshold;
+		},
+		partlyRightOfViewport: function( threshold ) {
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos.viewportWidth <= pos.elemRightBorder + pos.elemMargin[3] - pos.elemMargin[1] + _threshold
+				&& pos.viewportWidth > pos.elemLeftBorder + pos.elemMargin[3] - pos.elemMargin[1] - _threshold;
+		},
+		inViewport: function( threshold ) {
+			return !methods['aboveTheViewport'].call( this, threshold )
+				&& !methods['belowTheViewport'].call( this, threshold )
+				&& !methods['leftOfViewport'].call( this, threshold )
+				&& !methods['rightOfViewport'].call( this, threshold );
+		},
+		getState: function( options ) {
+			var settings = $.extend( {
+				"threshold": 1,
+				"allowPartly": true,
+				"allowMixedStates": true
+			}, options );
+
+			var _above = methods['aboveTheViewport'].call( this, settings.threshold );
+			var _below = methods['belowTheViewport'].call( this, settings.threshold );
+			var _left = methods['leftOfViewport'].call( this, settings.threshold );
+			var _right = methods['rightOfViewport'].call( this, settings.threshold );
+			var state = '';
 
 			if( !_above && !_below && !_left && !_right ) {
 				state = 'inside';
-			} else if( _above && !_below ) {
-				if( mixed && ( _left || _right ) ) {
-					state = _left ? 'above-left' : 'above-right';
-				} else {
-					state = 'above';
-				}
-			} else if( _below && !_above ) {
-				if( mixed && ( _left || _right ) ) {
-					state = _left ? 'below-left' : 'below-right';
-				} else {
-					state = 'below';
-				}
-			} else if( _left && !_above && !_below && !_right ) {
-				state = 'left';
-			} else if( _right && !_above && !_below && !_left ) {
-				state = 'right';
 			} else {
-				state = 'outside';
+				if( settings.allowPartly ) {
+					var _partlyAbove = methods['partlyAboveTheViewport'].call( this, settings.threshold );
+					var _partlyBelow = methods['partlyBelowTheViewport'].call( this, settings.threshold );
+					var _partlyLeft = methods['partlyLeftOfViewport'].call( this, settings.threshold );
+					var _partlyRight = methods['partlyRightOfViewport'].call( this, settings.threshold );
+
+					if( _partlyAbove && !_partlyBelow ) {
+						if( settings.allowMixedStates && ( _partlyLeft || _partlyRight ) ) {
+							state = _partlyLeft ? 'partly-above partly-left' : 'partly-above partly-right';
+						} else if( settings.allowMixedStates && ( _left || _right ) ) {
+							state = _left ? 'left partly-above' : 'right partly-above';
+						} else {
+							state = 'partly-above';
+						}
+					} else if( _partlyBelow && !_partlyAbove ) {
+						if( settings.allowMixedStates && ( _partlyLeft || _partlyRight ) ) {
+							state = _partlyLeft ? 'partly-below partly-left' : 'partly-below partly-right';
+						} else if( settings.allowMixedStates && ( _left || _right ) ) {
+							state = _left ? 'left partly-below' : 'right partly-below';
+						} else {
+							state = 'partly-below';
+						}
+					} else if( _partlyLeft && !_partlyAbove && !_partlyBelow && !_partlyRight ) {
+						if( settings.allowMixedStates && ( _above || _below ) ) {
+							state = _above ? 'above partly-left' : 'below partly-left';
+						} else {
+							state = 'partly-left';
+						}
+					} else if( _partlyRight && !_partlyAbove && !_partlyBelow && !_partlyLeft ) {
+						if( settings.allowMixedStates && ( _above || _below ) ) {
+							state = _above ? 'above partly-right' : 'below partly-right';
+						} else {
+							state = 'partly-right';
+						}
+					}
+				}
+				if( state == '' ) {
+					if( _above && !_below ) {
+						if( settings.allowMixedStates && ( _left || _right ) ) {
+							state = _left ? 'above-left' : 'above-right';
+						} else {
+							state = 'above';
+						}
+					} else if( _below && !_above ) {
+						if( settings.allowMixedStates && ( _left || _right ) ) {
+							state = _left ? 'below-left' : 'below-right';
+						} else {
+							state = 'below';
+						}
+					} else if( _left && !_above && !_below && !_right ) {
+						state = 'left';
+					} else if( _right && !_above && !_below && !_left ) {
+						state = 'right';
+					} else {
+						state = 'outside';
+					}
+				}
 			}
 
 			return state;
@@ -89,7 +178,7 @@
 		},
 		generateEUID: function() {
 			var result = "";
-			for( i = 0; i < 32; i++ ) {
+			for( var i = 0; i < 32; i++ ) {
 				result += Math.floor( Math.random() * 16 ).toString( 16 );
 			}
 
@@ -113,6 +202,18 @@
 		"in-viewport": function( obj, index, meta ) {
 			return methods['inViewport'].call( obj, meta[3] );
 		},
+		"partly-above-the-viewport": function( obj, index, meta ) {
+			return methods['partlyAboveTheViewport'].call( obj, meta[3] );
+		},
+		"partly-below-the-viewport": function( obj, index, meta ) {
+			return methods['partlyBelowTheViewport'].call( obj, meta[3] );
+		},
+		"partly-left-of-viewport": function( obj, index, meta ) {
+			return methods['partlyLeftOfViewport'].call( obj, meta[3] );
+		},
+		"partly-right-of-viewport": function( obj, index, meta ) {
+			return methods['partlyRightOfViewport'].call( obj, meta[3] );
+		},
 		"have-scroll": function( obj ) {
 			return methods['haveScroll'].call( obj );
 		}
@@ -120,11 +221,9 @@
 
 	$.fn.appearInViewport = function( callBack, options ) {
 		var settings = $.extend( {
-			"treshold": 1,
-			"noPartly": false,
+			"threshold": 1,
 			"allowPartly": true,
-			"allowMixedStates": true,
-			"scrollWidth": [ 17, 17 ]
+			"allowMixedStates": true
 		}, options );
 
 		if( typeof callBack == 'string' && callBack == 'destroy' ) {
@@ -147,16 +246,16 @@
 			var $this = this;
 			$( this ).data( 'euid', methods['generateEUID'].call() );
 
-			callBack.apply( $this, [ methods['getPosition'].apply( $this, [ settings.treshold, settings.allowMixedStates ] ) ] );
+			callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
 
 			var _scrollable = $( $this ).closest( ':have-scroll' );
 			if( _scrollable.get( 0 ).tagName == "BODY" ) {
 				$( window ).bind( "scroll.viewport" + $( this ).data( 'euid' ), function() {
-					callBack.apply( $this, [ methods['getPosition'].apply( $this, [ settings.treshold, settings.allowMixedStates ] ) ] );
+					callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
 				} );
 			} else {
 				_scrollable.bind( "scroll.viewport" + $( this ).data( 'euid' ), function() {
-					callBack.apply( $this, [ methods['getPosition'].apply( $this, [ settings.treshold, settings.allowMixedStates ] ) ] );
+					callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
 				} );
 			}
 		} );
