@@ -174,7 +174,8 @@
 			return state;
 		},
 		haveScroll: function() {
-			return this.scrollHeight > $( this ).height();
+			return this.scrollHeight > $( this ).height()
+				|| this.scrollWidth > $( this ).width();
 		},
 		generateEUID: function() {
 			var result = "";
