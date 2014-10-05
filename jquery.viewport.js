@@ -86,6 +86,14 @@
 		},
 		haveScroll: function() {
 			return this.scrollHeight > $( this ).height();
+		},
+		generateEUID: function() {
+			var result = "";
+			for( i = 0; i < 32; i++ ) {
+				result += Math.floor( Math.random() * 16 ).toString( 16 );
+			}
+
+			return result;
 		}
 	};
 
@@ -111,13 +119,6 @@
 	} );
 
 	$.fn.appearInViewport = function( callBack, options ) {
-		if( typeof callBack == 'string' && callBack == '' ) {
-
-		} else if( typeof callBack != 'function' ) {
-			$.error( 'Callback function not defined' );
-			return this;
-		}
-
 		var settings = $.extend( {
 			"treshold": 1,
 			"noPartly": false,
@@ -126,19 +127,36 @@
 			"scrollWidth": [ 17, 17 ]
 		}, options );
 
+		if( typeof callBack == 'string' && callBack == 'destroy' ) {
+			return this.each( function() {
+				var $this = this;
+				var _scrollable = $( $this ).closest( ':have-scroll' );
+
+				if( _scrollable.get( 0 ).tagName == "BODY" ) {
+					$( window ).unbind( ".viewport" + $( this ).data( 'euid' ) );
+				} else {
+					_scrollable.unbind( ".viewport" + $( this ).data( 'euid' ) );
+				}
+			} );
+		} else if( typeof callBack != 'function' ) {
+			$.error( 'Callback function not defined' );
+			return this;
+		}
+
 		return this.each( function() {
 			var $this = this;
+			$( this ).data( 'euid', methods['generateEUID'].call() );
 
-			callBack.apply( $this, [ methods['getPosition'].call( this, settings.treshold, settings.allowMixedStates ) ] );
+			callBack.apply( $this, [ methods['getPosition'].apply( $this, [ settings.treshold, settings.allowMixedStates ] ) ] );
 
-			var scrollable = $( $this ).closest( ':have-scroll' );
-			if( scrollable.get( 0 ).tagName == "BODY" ) {
-				$( window ).bind( "scroll.viewport", function() {
-					callBack.apply( $this, [ methods['getPosition'].call( $this, settings.treshold, settings.allowMixedStates ) ] );
+			var _scrollable = $( $this ).closest( ':have-scroll' );
+			if( _scrollable.get( 0 ).tagName == "BODY" ) {
+				$( window ).bind( "scroll.viewport" + $( this ).data( 'euid' ), function() {
+					callBack.apply( $this, [ methods['getPosition'].apply( $this, [ settings.treshold, settings.allowMixedStates ] ) ] );
 				} );
 			} else {
-				scrollable.bind( "scroll.viewport", function() {
-					callBack.apply( $this, [ methods['getPosition'].call( $this, settings.treshold, settings.allowMixedStates ) ] );
+				_scrollable.bind( "scroll.viewport" + $( this ).data( 'euid' ), function() {
+					callBack.apply( $this, [ methods['getPosition'].apply( $this, [ settings.treshold, settings.allowMixedStates ] ) ] );
 				} );
 			}
 		} );
