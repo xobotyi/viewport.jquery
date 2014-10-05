@@ -188,6 +188,9 @@
 	};
 
 	$.extend( $.expr[':'], {
+		"in-viewport": function( obj, index, meta ) {
+			return methods['inViewport'].call( obj, meta[3] );
+		},
 		"above-the-viewport": function( obj, index, meta ) {
 			return methods['aboveTheViewport'].call( obj, meta[3] );
 		},
@@ -199,9 +202,6 @@
 		},
 		"right-of-viewport": function( obj, index, meta ) {
 			return methods['rightOfViewport'].call( obj, meta[3] );
-		},
-		"in-viewport": function( obj, index, meta ) {
-			return methods['inViewport'].call( obj, meta[3] );
 		},
 		"partly-above-the-viewport": function( obj, index, meta ) {
 			return methods['partlyAboveTheViewport'].call( obj, meta[3] );
