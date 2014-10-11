@@ -1,12 +1,8 @@
 /*
- * Viewport - jQuery plugin adding selectors and events for finding and handling elements in viewport
- *
- * Copyright (c) 2014 Anton Zinoviev (xobotyi)
- *
- * Licensed: MIT License (MIT)
- *
- * Project home: homeless
- * */
+ * viewport - jQuery plugin for elements positioning in viewport
+ * (c) Copyright 2014, Anton Zinoviev aka xobotyi
+ * Released under the MIT license
+ */
 (function( $ ) {
 	var methods = {
 		getElementPosition: function() {

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="UTF-8">
+		<title>kQuery.viewport work example</title>
+
+		<link rel="stylesheet" href="stylesheet.css" />
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/zenburn.min.css">
+	</head>
+	<body>
+		<div class="scrollable-wrapper">
+			<div class="element 1">
+				<div class="sub-element">
+					<span>I'm inside block</span>
+				</div>
+			</div>
+			<div class="element 2">
+				<div class="sub-element">
+					<span>I'm below block
+						<span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+					</span>
+				</div>
+			</div>
+			<div class="element 3">
+				<div class="sub-element">
+					<span>I'm inside block</span>
+				</div>
+			</div>
+			<div class="element 4">
+				<div class="sub-element">
+					<span>I'm below block</span>
+				</div>
+			</div>
+			<div class="element 5">
+				<div class="sub-element">
+					<span>I'm inside block</span>
+				</div>
+			</div>
+			<div class="element 6">
+				<div class="sub-element">
+					<span>I'm below block</span>
+				</div>
+			</div>
+		</div>
+		<div class="ghost-wrapper">
+			<div class="element 1">
+				<div class="sub-element">
+					<span>I'm inside block</span>
+				</div>
+			</div>
+			<div class="element 2">
+				<div class="sub-element">
+					<span>I'm below block</span>
+				</div>
+			</div>
+			<div class="element 3">
+				<div class="sub-element">
+					<span>I'm inside block</span>
+				</div>
+			</div>
+			<div class="element 4">
+				<div class="sub-element">
+					<span>I'm below block</span>
+				</div>
+			</div>
+			<div class="element 5">
+				<div class="sub-element">
+					<span>I'm inside block</span>
+				</div>
+			</div>
+			<div class="element 6">
+				<div class="sub-element">
+					<span>I'm below block</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="message">Hello, i'm Viewport and i'm painted red.<br />
+			You can resize me vertically, and i'll still track my little childrens correctly ^_^<br />
+			Below you can see my JS code. <br /><br />
+			<pre><code class="javascript">$( '.scrollable-wrapper .element .sub-element' ).viewportTrack( function(
+				state ) {
+				$( '.ghost-wrapper' ).find( '.' + $( this ).parent().get( 0 )
+				.className.replace( / /, '.' ) ).find('span' ).text( state );
+				}, {
+				"threshold": 0,
+				"allowPartly": true
+				} );</code></pre>
+		</div>
+	</body>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+	<script src="../jquery.viewport.js"></script>
+	<script type="text/javascript">
+		$( function() {
+			hljs.initHighlightingOnLoad();
+
+			var scrollable = $( '.scrollable-wrapper' );
+			var ghost = $( '.ghost-wrapper' );
+			ghost.css( 'margin-top', scrollable.offset().top );
+			scrollable.scroll( function() {
+				ghost.offset( { 'top': scrollable.offset().top - scrollable.scrollTop() } );
+			} );
+
+			scrollable.resize( function() {
+				ghost.offset( { 'top': scrollable.offset().top - scrollable.scrollTop() } );
+			} );
+
+			scrollable.find( '.element' ).eq( 1 ).viewportTrack( function( state ) {
+				$( this ).find( 'span' ).text( state );
+				ghost.find( '.' + $( this ).parent().get( 0 ).className.replace( / /, '.' ) ).find( 'span' ).text( state );
+			}, {
+				"threshold": 0,
+				"allowPartly": false,
+				"allowMixedStates": false
+			} );
+		} );
+	</script>
+</html>
