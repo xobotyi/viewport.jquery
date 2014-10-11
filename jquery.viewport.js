@@ -10,91 +10,103 @@
 (function( $ ) {
 	var methods = {
 		getElementPosition: function() {
+
 			var _scrollableParent = $( this ).parents( ':have-scroll' );
 
 			if( !_scrollableParent.length ) {
 				return false;
 			}
 
-			var _topBorder = _scrollableParent.get( 0 ).tagName == "BODY" ? $( this ).offset().top : $( this ).position().top;
-			var _leftBorder = _scrollableParent.get( 0 ).tagName == "BODY" ? $( this ).offset().left : $( this ).position().left;
+			var _topBorder = methods['getFromTop'].call( this ) - _scrollableParent.scrollTop();
+			var _leftBorder = methods['getFromLeft'].call( this ) - _scrollableParent.scrollLeft();
 
 			return {
 				"elemTopBorder": _topBorder,
 				"elemBottomBorder": _topBorder + $( this ).height(),
 				"elemLeftBorder": _leftBorder,
 				"elemRightBorder": _leftBorder + $( this ).width(),
-				"elemMargin": [
-					parseInt( $( this ).css( 'margin-top' ), 10 ),
-					parseInt( $( this ).css( 'margin-right' ), 10 ),
-					parseInt( $( this ).css( 'margin-bottom' ), 10 ),
-					parseInt( $( this ).css( 'margin-left' ), 10 )
-				],
 				"viewport": _scrollableParent,
 				"viewportHeight": _scrollableParent.height(),
 				"viewportWidth": _scrollableParent.width()
 			};
+		},
+		getFromTop: function() {
+			var fromTop = 0;
+
+			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( ':have-scroll' ); obj = obj.offsetParent ) {
+				fromTop += obj.offsetTop;
+			}
+
+			return Math.round( fromTop );
+		},
+		getFromLeft: function() {
+			var fromLeft = 0;
+
+			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( ':have-scroll' ); obj = obj.offsetParent ) {
+				fromLeft += obj.offsetLeft;
+			}
+
+			return Math.round( fromLeft );
 		},
 		aboveTheViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-
-			return pos ? pos.elemTopBorder + pos.elemMargin[0] - pos.elemMargin[2] - _threshold < 0 : false;
+			return pos ? pos.elemTopBorder - _threshold < 0 : false;
 		},
 		partlyAboveTheViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemTopBorder + pos.elemMargin[0] - pos.elemMargin[2] - _threshold < 0
-				&& pos.elemBottomBorder + pos.elemMargin[0] + pos.elemMargin[2] - _threshold >= 0 : false;
+			return pos ? pos.elemTopBorder - _threshold < 0
+				&& pos.elemBottomBorder - _threshold >= 0 : false;
 		},
 		belowTheViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportHeight <= pos.elemTopBorder + $( this ).height() + pos.elemMargin[0] - pos.elemMargin[2] + _threshold : false;
+			return pos ? pos.viewportHeight <= pos.elemBottomBorder + _threshold : false;
 		},
 		partlyBelowTheViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportHeight <= pos.elemBottomBorder + pos.elemMargin[0] - pos.elemMargin[2] + _threshold
-				&& pos.viewportHeight > pos.elemTopBorder + pos.elemMargin[0] - pos.elemMargin[2] - _threshold : false;
+			return pos ? pos.viewportHeight <= pos.elemBottomBorder + _threshold
+				&& pos.viewportHeight > pos.elemTopBorder - _threshold : false;
 		},
 		leftOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemLeftBorder + pos.elemMargin[3] - pos.elemMargin[1] - _threshold < 0 : false;
+			return pos ? pos.elemLeftBorder - _threshold < 0 : false;
 		},
 		partlyLeftOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemLeftBorder + pos.elemMargin[3] - pos.elemMargin[1] - _threshold < 0
-				&& pos.elemRightBorder + pos.elemMargin[3] - pos.elemMargin[1] + _threshold >= 0 : false;
+			return pos ? pos.elemLeftBorder - _threshold < 0
+				&& pos.elemRightBorder + _threshold >= 0 : false;
 		},
 		rightOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportWidth <= pos.elemRightBorder + pos.elemMargin[3] - pos.elemMargin[1] + _threshold : false;
+			return pos ? pos.viewportWidth <= pos.elemRightBorder + _threshold : false;
 		},
 		partlyRightOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportWidth <= pos.elemRightBorder + pos.elemMargin[3] - pos.elemMargin[1] + _threshold
-				&& pos.viewportWidth > pos.elemLeftBorder + pos.elemMargin[3] - pos.elemMargin[1] - _threshold : false;
+			return pos ? pos.viewportWidth <= pos.elemRightBorder + _threshold
+				&& pos.viewportWidth > pos.elemLeftBorder - _threshold : false;
 		},
 		inViewport: function( threshold ) {
 			return !methods['aboveTheViewport'].call( this, threshold )
@@ -180,8 +192,8 @@
 			return state;
 		},
 		haveScroll: function() {
-			return this.scrollHeight > $( this ).height()
-				|| this.scrollWidth > $( this ).width();
+			return this.scrollHeight > this.offsetHeight
+				|| this.scrollWidth > this.offsetWidth;
 		},
 		generateEUID: function() {
 			var result = "";
@@ -226,7 +238,7 @@
 		}
 	} );
 
-	$.fn.viewportTrace = function( callBack, options ) {
+	$.fn.viewportTrack = function( callBack, options ) {
 		var settings = $.extend( {
 			"threshold": 0,
 			"allowPartly": false,
@@ -257,7 +269,7 @@
 
 			callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
 
-			var _scrollable = $( $this ).parent( ':have-scroll' );
+			var _scrollable = $( $this ).parents( ':have-scroll' );
 
 			if( !_scrollable.length ) {
 				return false;
