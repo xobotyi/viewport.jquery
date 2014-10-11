@@ -84,8 +84,60 @@ $( ":have-scroll" );
 
 This pseudo-selector returns <code><i>true</i></code> if element have scrollbars, actually, it returns <code><i>true</i></code> if content's dimensions exceeds element's dimensions.<br>
 In Viewport plugin, this pseudo-selector uses for determining element's viewport, mostly, element's viewport - is parent element having the scrollbars.
-<blockquote><b>As it is necessary to clarify</b> that, depending on the context, the viewport can be any DOM element, dimensions whose content exceeds his own.</blockquote>
+<blockquote><b>It is necessary to clarify</b> that, depending on the context, the viewport can be any DOM element, whose content size exceeds his own.</blockquote>
 
-## Element position watcher
+## Element's position tracker
 
-TODO: finish this readme
+If you need continuous tracking of element's position, you can call plugin, on it.
+
+```javascript
+$( ".some-element" ).viewportTrace( function( state ){
+    //your callback code
+ }, {
+    "threshold": 0,
+    "allowPartly": false,
+    "allowMixedStates": false
+ });
+```
+
+The callback function is required, if you'll try to call plugin without callback function, exception will be generated.<br>
+Element's state returns in callback parameter.
+
+#### Plugin options
+
+##### threshold
+
+Threshold parameter was described above.
+
+##### allowPartly
+
+By default element can have 5 states:
+
+     <ul>
+         <li>inside</li>
+         <li>above</li>
+         <li>below</li>
+         <li>left</li>
+         <li>right</li>
+     </ul>
+     
+<blockquote>Note, that any type of <code>above</code> and <code>below</code> states have priority above <code>left</code> and <code>right</code> states.
+<img src="http://habrastorage.org/files/3ea/308/683/3ea3086831d34d778f0618a026d626d7.jpg"/></blockquote>
+Turning on <code>allowPartly</code> option extends range of returning states with following:
+
+    <ul>
+         <li>partly-above</li>
+         <li>partly-below</li>
+         <li>partly-left</li>
+         <li>partly-right</li>
+     </ul>
+
+<img src="http://habrastorage.org/files/d12/398/779/d1239877992d45c98e98e9a30f7bee0b.jpg"/>
+
+##### allowMixedStates
+
+Turns on mixing of different element-states.
+As previously, <code>above</code> and <code>below</code> states have priority above others, and "full" states goes before "partly" states, so return value looks like:<br>
+<code>above right</code><br>
+or<br>
+<code>right partly-below</code>

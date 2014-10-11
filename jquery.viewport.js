@@ -104,24 +104,24 @@
 		},
 		getState: function( options ) {
 			var settings = $.extend( {
-				"viewport": false,
-				"allowPartly": true,
-				"allowMixedStates": true
+				"threshold": 0,
+				"allowPartly": false,
+				"allowMixedStates": false
 			}, options );
 
-			var _above = methods['aboveTheViewport'].call( this, settings.viewport );
-			var _below = methods['belowTheViewport'].call( this, settings.viewport );
-			var _left = methods['leftOfViewport'].call( this, settings.viewport );
-			var _right = methods['rightOfViewport'].call( this, settings.viewport );
+			var _above = methods['aboveTheViewport'].call( this, settings.threshold );
+			var _below = methods['belowTheViewport'].call( this, settings.threshold );
+			var _left = methods['leftOfViewport'].call( this, settings.threshold );
+			var _right = methods['rightOfViewport'].call( this, settings.threshold );
 			var state = '';
 
 			if( !_above && !_below && !_left && !_right ) {
 				state = 'inside';
 			} else {
 				if( settings.allowPartly ) {
-					var _partlyAbove = methods['partlyAboveTheViewport'].call( this, settings.viewport );
-					var _partlyBelow = methods['partlyBelowTheViewport'].call( this, settings.viewport );
-					var _partlyLeft = methods['partlyLeftOfViewport'].call( this, settings.viewport );
+					var _partlyAbove = methods['partlyAboveTheViewport'].call( this, settings.threshold );
+					var _partlyBelow = methods['partlyBelowTheViewport'].call( this, settings.threshold );
+					var _partlyLeft = methods['partlyLeftOfViewport'].call( this, settings.threshold );
 					var _partlyRight = methods['partlyRightOfViewport'].call( this, settings.threshold );
 
 					if( _partlyAbove && !_partlyBelow ) {
@@ -226,11 +226,11 @@
 		}
 	} );
 
-	$.fn.appearInViewport = function( callBack, options ) {
+	$.fn.viewportTrace = function( callBack, options ) {
 		var settings = $.extend( {
-			"viewport": false,
-			"allowPartly": true,
-			"allowMixedStates": true
+			"threshold": 0,
+			"allowPartly": false,
+			"allowMixedStates": false
 		}, options );
 
 		if( typeof callBack == 'string' && callBack == 'destroy' ) {
