@@ -121,7 +121,7 @@ By default element can have 5 states:
          <li>right</li>
      </ul>
      
-<blockquote>Note, that any type of <code>above</code> and <code>below</code> states have priority above <code>left</code> and <code>right</code> states.
+<blockquote>Note, that any type of <code>above</code> and <code>below</code> states have priority above <code>left</code> and <code>right</code> states.<br>
 <img src="http://habrastorage.org/files/3ea/308/683/3ea3086831d34d778f0618a026d626d7.jpg"/></blockquote>
 Turning on <code>allowPartly</code> option extends range of returning states with following:
 
@@ -141,3 +141,11 @@ As previously, <code>above</code> and <code>below</code> states have priority ab
 <code>above right</code><br>
 or<br>
 <code>right partly-below</code>
+
+### Untie tracker
+
+If there is no more need to track element, you can use "destroy" parameter.
+
+```javascript
+$( ".some-element" ).viewportTrace('destroy');
+```

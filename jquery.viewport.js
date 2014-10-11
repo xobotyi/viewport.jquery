@@ -240,8 +240,10 @@
 
 				if( _scrollable.get( 0 ).tagName == "BODY" ) {
 					$( window ).unbind( ".viewport" + $( this ).data( 'euid' ) );
+					$( this ).removeData( 'euid' );
 				} else {
 					_scrollable.unbind( ".viewport" + $( this ).data( 'euid' ) );
+					$( this ).removeData( 'euid' );
 				}
 			} );
 		} else if( typeof callBack != 'function' ) {
