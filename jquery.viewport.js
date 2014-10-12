@@ -274,7 +274,9 @@
 
 		return this.each( function() {
 			var $this = this;
-			$( this ).data( 'euid', methods['generateEUID'].call() );
+
+			if( typeof $( this ).data( 'euid' ) == 'undefined' )
+				$( this ).data( 'euid', methods['generateEUID'].call() );
 
 			callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
 
