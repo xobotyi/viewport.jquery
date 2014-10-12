@@ -16,9 +16,7 @@
 			</div>
 			<div class="element 2">
 				<div class="sub-element">
-					<span>I'm below block
-						<span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
-					</span>
+					<span>I'm below block</span>
 				</div>
 			</div>
 			<div class="element 3">
@@ -78,14 +76,13 @@
 		<div class="message">Hello, i'm Viewport and i'm painted red.<br />
 			You can resize me vertically, and i'll still track my little childrens correctly ^_^<br />
 			Below you can see my JS code. <br /><br />
-			<pre><code class="javascript">$( '.scrollable-wrapper .element .sub-element' ).viewportTrack( function(
-				state ) {
-				$( '.ghost-wrapper' ).find( '.' + $( this ).parent().get( 0 )
-				.className.replace( / /, '.' ) ).find('span' ).text( state );
-				}, {
-				"threshold": 0,
-				"allowPartly": true
-				} );</code></pre>
+			<pre><code class="javascript">$( '.scrollable-wrapper .element .sub-element' ).viewportTrack( function( state ) {
+	$( '.ghost-wrapper' ).find( '.' + $( this ).parent().get( 0 )
+	.className.replace( / /, '.' ) ).find('span' ).text( state );
+}, {
+	"threshold": 0,
+	"allowPartly": true
+} );</code></pre>
 		</div>
 	</body>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -106,13 +103,13 @@
 				ghost.offset( { 'top': scrollable.offset().top - scrollable.scrollTop() } );
 			} );
 
-			scrollable.find( '.element' ).eq( 1 ).viewportTrack( function( state ) {
+			scrollable.find( '.element .sub-element' ).viewportTrack( function( state ) {
 				$( this ).find( 'span' ).text( state );
-				ghost.find( '.' + $( this ).parent().get( 0 ).className.replace( / /, '.' ) ).find( 'span' ).text( state );
+				ghost.find( '.' + $( this ).parent().get( 0 )
+						.className.replace( / /, '.' ) ).find( 'span' ).text( state );
 			}, {
 				"threshold": 0,
-				"allowPartly": false,
-				"allowMixedStates": false
+				"allowPartly": true
 			} );
 		} );
 	</script>

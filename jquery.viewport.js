@@ -6,7 +6,6 @@
 (function( $ ) {
 	var methods = {
 		getElementPosition: function() {
-
 			var _scrollableParent = $( this ).parents( ':have-scroll' );
 
 			if( !_scrollableParent.length ) {
@@ -64,22 +63,22 @@
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportHeight <= pos.elemBottomBorder + _threshold : false;
+			return pos ? pos.viewportHeight < pos.elemBottomBorder + _threshold : false;
 		},
 		partlyBelowTheViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportHeight <= pos.elemBottomBorder + _threshold
-				&& pos.viewportHeight > pos.elemTopBorder - _threshold : false;
+			return pos ? pos.viewportHeight < pos.elemBottomBorder + _threshold
+				&& pos.viewportHeight > pos.elemTopBorder + _threshold : false;
 		},
 		leftOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemLeftBorder - _threshold < 0 : false;
+			return pos ? pos.elemLeftBorder - _threshold <= 0 : false;
 		},
 		partlyLeftOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
@@ -87,28 +86,32 @@
 			var pos = methods['getElementPosition'].call( this );
 
 			return pos ? pos.elemLeftBorder - _threshold < 0
-				&& pos.elemRightBorder + _threshold >= 0 : false;
+				&& pos.elemRightBorder - _threshold >= 0 : false;
 		},
 		rightOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportWidth <= pos.elemRightBorder + _threshold : false;
+			return pos ? pos.viewportWidth < pos.elemRightBorder + _threshold : false;
 		},
 		partlyRightOfViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
 
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportWidth <= pos.elemRightBorder + _threshold
-				&& pos.viewportWidth > pos.elemLeftBorder - _threshold : false;
+			return pos ? pos.viewportWidth < pos.elemRightBorder + _threshold
+				&& pos.viewportWidth > pos.elemLeftBorder + _threshold : false;
 		},
 		inViewport: function( threshold ) {
-			return !methods['aboveTheViewport'].call( this, threshold )
-				&& !methods['belowTheViewport'].call( this, threshold )
-				&& !methods['leftOfViewport'].call( this, threshold )
-				&& !methods['rightOfViewport'].call( this, threshold );
+			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
+
+			var pos = methods['getElementPosition'].call( this );
+
+			return pos ? !( pos.elemTopBorder - _threshold < 0 )
+				&& !( pos.viewportHeight < pos.elemBottomBorder + _threshold )
+				&& !( pos.elemLeftBorder - _threshold < 0 )
+				&& !( pos.viewportWidth < pos.elemRightBorder + _threshold ) : true;
 		},
 		getState: function( options ) {
 			var settings = $.extend( {
@@ -117,20 +120,26 @@
 				"allowMixedStates": false
 			}, options );
 
-			var _above = methods['aboveTheViewport'].call( this, settings.threshold );
-			var _below = methods['belowTheViewport'].call( this, settings.threshold );
-			var _left = methods['leftOfViewport'].call( this, settings.threshold );
-			var _right = methods['rightOfViewport'].call( this, settings.threshold );
+			var pos = methods['getElementPosition'].call( this );
+
+			if( !pos ){
+				return 'inside';
+			}
+
+			var _above = pos.elemTopBorder - settings.threshold < 0;
+			var _below = pos.viewportHeight < pos.elemBottomBorder + settings.threshold;
+			var _left = pos.elemLeftBorder - settings.threshold < 0;
+			var _right = pos.viewportWidth < pos.elemRightBorder + settings.threshold;
 			var state = '';
 
 			if( !_above && !_below && !_left && !_right ) {
 				state = 'inside';
 			} else {
 				if( settings.allowPartly ) {
-					var _partlyAbove = methods['partlyAboveTheViewport'].call( this, settings.threshold );
-					var _partlyBelow = methods['partlyBelowTheViewport'].call( this, settings.threshold );
-					var _partlyLeft = methods['partlyLeftOfViewport'].call( this, settings.threshold );
-					var _partlyRight = methods['partlyRightOfViewport'].call( this, settings.threshold );
+					var _partlyAbove = pos.elemTopBorder - settings.threshold < 0 && pos.elemBottomBorder - settings.threshold >= 0;
+					var _partlyBelow = pos.viewportHeight < pos.elemBottomBorder + settings.threshold && pos.viewportHeight > pos.elemTopBorder + settings.threshold;
+					var _partlyLeft = pos.elemLeftBorder - settings.threshold < 0 && pos.elemRightBorder - settings.threshold >= 0;
+					var _partlyRight = pos.viewportWidth < pos.elemRightBorder + settings.threshold && pos.viewportWidth > pos.elemLeftBorder + settings.threshold;
 
 					if( _partlyAbove && !_partlyBelow ) {
 						if( settings.allowMixedStates && ( _partlyLeft || _partlyRight ) ) {
