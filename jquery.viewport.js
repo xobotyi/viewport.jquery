@@ -255,6 +255,10 @@
 				var $this = this;
 				var _scrollable = $( $this ).parent( ':have-scroll' );
 
+				if( !_scrollable.length || typeof $( this ).data( 'euid' ) == 'undefined' ) {
+					return true;
+				}
+
 				if( _scrollable.get( 0 ).tagName == "BODY" ) {
 					$( window ).unbind( ".viewport" + $( this ).data( 'euid' ) );
 					$( this ).removeData( 'euid' );
@@ -277,7 +281,8 @@
 			var _scrollable = $( $this ).parents( ':have-scroll' );
 
 			if( !_scrollable.length ) {
-				return false;
+				callBack.apply( $this, 'inside' );
+				return true;
 			}
 
 			if( _scrollable.get( 0 ).tagName == "BODY" ) {
