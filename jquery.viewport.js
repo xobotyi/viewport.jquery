@@ -231,6 +231,7 @@
 	$.fn.viewportTrack = function( callBack, options ) {
 		var settings = $.extend( {
 			"threshold": 0,
+			"checkOnInit": true,
 			"allowPartly": false
 		}, options );
 
@@ -264,7 +265,9 @@
 			if( typeof $this.data( 'euid' ) == 'undefined' )
 				$this.data( 'euid', methods['generateEUID'].call() );
 
-			callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
+			if( settings.checkOnInit ){
+				callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
+			}
 
 			var _scrollable = $( $this ).parents( ':have-scroll' );
 
