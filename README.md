@@ -98,6 +98,7 @@ $( ".some-element" ).viewportTrace( function( state ){
     //your callback code
  }, {
     "threshold": 0,
+    "checkOnInit": true,
     "allowPartly": false
  });
 ```
@@ -140,6 +141,9 @@ Turning on <code>allowPartly</code> option extends range of returning states wit
  </ul>
 
 <img src="http://habrastorage.org/files/d12/398/779/d1239877992d45c98e98e9a30f7bee0b.jpg"/>
+
+##### checkOnInit
+By default, this option turned on, and tracker fires callback on initiantion. Turning this callback to <code>false</code> you can disable initial callback fire.
 
 
 ### Untie tracker
