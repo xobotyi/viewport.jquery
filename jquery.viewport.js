@@ -269,7 +269,7 @@
 			var _scrollable = $( $this ).parents( ':have-scroll' );
 
 			if( !_scrollable.length ) {
-				callBack.apply( obj, 'inside' );
+				callBack.apply( obj, [ 'inside' ] );
 				return true;
 			}
 
