@@ -6,42 +6,37 @@
 (function( $ ) {
 	var methods = {
 		getElementPosition: function() {
-			var _scrollableParent = $( this ).parents( ':have-scroll' );
+			var $this = $( this );
+			var _scrollableParent = $this.parents( ':have-scroll' );
 
 			if( !_scrollableParent.length ) {
 				return false;
 			}
 
-			var _topBorder = methods['getFromTop'].call( this ) - _scrollableParent.scrollTop();
-			var _leftBorder = methods['getFromLeft'].call( this ) - _scrollableParent.scrollLeft();
+			var pos = methods['getRelativePosition'].call( this );
+			var _topBorder = pos.top - _scrollableParent.scrollTop();
+			var _leftBorder = pos.left - _scrollableParent.scrollLeft();
 
 			return {
 				"elemTopBorder": _topBorder,
-				"elemBottomBorder": _topBorder + $( this ).height(),
+				"elemBottomBorder": _topBorder + $this.height(),
 				"elemLeftBorder": _leftBorder,
-				"elemRightBorder": _leftBorder + $( this ).width(),
+				"elemRightBorder": _leftBorder + $this.width(),
 				"viewport": _scrollableParent,
 				"viewportHeight": _scrollableParent.height(),
 				"viewportWidth": _scrollableParent.width()
 			};
 		},
-		getFromTop: function() {
+		getRelativePosition: function() {
 			var fromTop = 0;
-
-			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( ':have-scroll' ); obj = obj.offsetParent ) {
-				fromTop += obj.offsetTop;
-			}
-
-			return Math.round( fromTop );
-		},
-		getFromLeft: function() {
 			var fromLeft = 0;
 
 			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( ':have-scroll' ); obj = obj.offsetParent ) {
+				fromTop += obj.offsetTop;
 				fromLeft += obj.offsetLeft;
 			}
 
-			return Math.round( fromLeft );
+			return { "top": Math.round( fromTop ), "left": Math.round( fromLeft ) };
 		},
 		aboveTheViewport: function( threshold ) {
 			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
@@ -116,85 +111,74 @@
 		getState: function( options ) {
 			var settings = $.extend( {
 				"threshold": 0,
-				"allowPartly": false,
-				"allowMixedStates": false
+				"allowPartly": false
 			}, options );
 
+			var ret = { "inside": false, "posY": '', "posX": '' };
 			var pos = methods['getElementPosition'].call( this );
 
-			if( !pos ){
-				return 'inside';
+			if( !pos ) {
+				ret.inside = true;
+				return ret;
 			}
 
 			var _above = pos.elemTopBorder - settings.threshold < 0;
 			var _below = pos.viewportHeight < pos.elemBottomBorder + settings.threshold;
 			var _left = pos.elemLeftBorder - settings.threshold < 0;
 			var _right = pos.viewportWidth < pos.elemRightBorder + settings.threshold;
-			var state = '';
+
+			if( settings.allowPartly ) {
+				var _partlyAbove = pos.elemTopBorder - settings.threshold < 0 && pos.elemBottomBorder - settings.threshold >= 0;
+				var _partlyBelow = pos.viewportHeight < pos.elemBottomBorder + settings.threshold && pos.viewportHeight > pos.elemTopBorder + settings.threshold;
+				var _partlyLeft = pos.elemLeftBorder - settings.threshold < 0 && pos.elemRightBorder - settings.threshold >= 0;
+				var _partlyRight = pos.viewportWidth < pos.elemRightBorder + settings.threshold && pos.viewportWidth > pos.elemLeftBorder + settings.threshold;
+			}
+
 
 			if( !_above && !_below && !_left && !_right ) {
-				state = 'inside';
-			} else {
-				if( settings.allowPartly ) {
-					var _partlyAbove = pos.elemTopBorder - settings.threshold < 0 && pos.elemBottomBorder - settings.threshold >= 0;
-					var _partlyBelow = pos.viewportHeight < pos.elemBottomBorder + settings.threshold && pos.viewportHeight > pos.elemTopBorder + settings.threshold;
-					var _partlyLeft = pos.elemLeftBorder - settings.threshold < 0 && pos.elemRightBorder - settings.threshold >= 0;
-					var _partlyRight = pos.viewportWidth < pos.elemRightBorder + settings.threshold && pos.viewportWidth > pos.elemLeftBorder + settings.threshold;
+				ret.inside = true;
+				return ret;
+			}
 
-					if( _partlyAbove && !_partlyBelow ) {
-						if( settings.allowMixedStates && ( _partlyLeft || _partlyRight ) ) {
-							state = _partlyLeft ? 'partly-above partly-left' : 'partly-above partly-right';
-						} else if( settings.allowMixedStates && ( _left || _right ) ) {
-							state = _left ? 'left partly-above' : 'right partly-above';
-						} else {
-							state = 'partly-above';
-						}
-					} else if( _partlyBelow && !_partlyAbove ) {
-						if( settings.allowMixedStates && ( _partlyLeft || _partlyRight ) ) {
-							state = _partlyLeft ? 'partly-below partly-left' : 'partly-below partly-right';
-						} else if( settings.allowMixedStates && ( _left || _right ) ) {
-							state = _left ? 'left partly-below' : 'right partly-below';
-						} else {
-							state = 'partly-below';
-						}
-					} else if( _partlyLeft && !_partlyAbove && !_partlyBelow && !_partlyRight ) {
-						if( settings.allowMixedStates && ( _above || _below ) ) {
-							state = _above ? 'above partly-left' : 'below partly-left';
-						} else {
-							state = 'partly-left';
-						}
-					} else if( _partlyRight && !_partlyAbove && !_partlyBelow && !_partlyLeft ) {
-						if( settings.allowMixedStates && ( _above || _below ) ) {
-							state = _above ? 'above partly-right' : 'below partly-right';
-						} else {
-							state = 'partly-right';
-						}
-					}
+			if( settings.allowPartly ) {
+				if( _partlyAbove && _partlyBelow ) {
+					ret.posY = 'exceeds';
+				} else if( ( _partlyAbove && !_partlyBelow ) || ( _partlyBelow && !_partlyAbove ) ) {
+					ret.posY = _partlyAbove ? 'partly-above' : 'partly-below';
+				} else if( !_above && !_below ) {
+					ret.posY = 'inside';
+				} else {
+					ret.posY = _above ? 'above' : 'below';
 				}
-				if( state == '' ) {
-					if( _above && !_below ) {
-						if( settings.allowMixedStates && ( _left || _right ) ) {
-							state = _left ? 'above-left' : 'above-right';
-						} else {
-							state = 'above';
-						}
-					} else if( _below && !_above ) {
-						if( settings.allowMixedStates && ( _left || _right ) ) {
-							state = _left ? 'below-left' : 'below-right';
-						} else {
-							state = 'below';
-						}
-					} else if( _left && !_above && !_below && !_right ) {
-						state = 'left';
-					} else if( _right && !_above && !_below && !_left ) {
-						state = 'right';
-					} else {
-						state = 'outside';
-					}
+
+				if( _partlyLeft && _partlyRight ) {
+					ret.posX = 'exceeds';
+				} else if( ( _partlyLeft && !_partlyRight ) || ( _partlyLeft && !_partlyRight ) ) {
+					ret.posX = _partlyLeft ? 'partly-above' : 'partly-below';
+				} else if( !_left && !_right ) {
+					ret.posX = 'inside';
+				} else {
+					ret.posX = _left ? 'left' : 'right';
+				}
+			} else {
+				if( _above && _below ) {
+					ret.posY = 'exceeds';
+				} else if( !_above && !_below ) {
+					ret.posY = 'inside';
+				} else {
+					ret.posY = _above ? 'above' : 'below';
+				}
+
+				if( _left && _right ) {
+					ret.posX = 'exceeds';
+				} else if( !_left && !_right ) {
+					ret.posX = 'inside';
+				} else {
+					ret.posX = _left ? 'left' : 'right';
 				}
 			}
 
-			return state;
+			return ret;
 		},
 		haveScroll: function() {
 			return this.scrollHeight > this.offsetHeight
@@ -246,25 +230,25 @@
 	$.fn.viewportTrack = function( callBack, options ) {
 		var settings = $.extend( {
 			"threshold": 0,
-			"allowPartly": false,
-			"allowMixedStates": false
+			"allowPartly": false
 		}, options );
 
 		if( typeof callBack == 'string' && callBack == 'destroy' ) {
 			return this.each( function() {
-				var $this = this;
-				var _scrollable = $( $this ).parent( ':have-scroll' );
+				var $this = $( this );
 
-				if( !_scrollable.length || typeof $( this ).data( 'euid' ) == 'undefined' ) {
+				var _scrollable = $this.parent( ':have-scroll' );
+
+				if( !_scrollable.length || typeof $this.data( 'euid' ) == 'undefined' ) {
 					return true;
 				}
 
 				if( _scrollable.get( 0 ).tagName == "BODY" ) {
-					$( window ).unbind( ".viewport" + $( this ).data( 'euid' ) );
-					$( this ).removeData( 'euid' );
+					$( window ).unbind( ".viewport" + $this.data( 'euid' ) );
+					$this.removeData( 'euid' );
 				} else {
-					_scrollable.unbind( ".viewport" + $( this ).data( 'euid' ) );
-					$( this ).removeData( 'euid' );
+					_scrollable.unbind( ".viewport" + $this.data( 'euid' ) );
+					$this.removeData( 'euid' );
 				}
 			} );
 		} else if( typeof callBack != 'function' ) {
@@ -273,27 +257,28 @@
 		}
 
 		return this.each( function() {
-			var $this = this;
+			var $this = $( this );
+			var obj = this;
 
-			if( typeof $( this ).data( 'euid' ) == 'undefined' )
-				$( this ).data( 'euid', methods['generateEUID'].call() );
+			if( typeof $this.data( 'euid' ) == 'undefined' )
+				$this.data( 'euid', methods['generateEUID'].call() );
 
-			callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
+			callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
 
 			var _scrollable = $( $this ).parents( ':have-scroll' );
 
 			if( !_scrollable.length ) {
-				callBack.apply( $this, 'inside' );
+				callBack.apply( obj, 'inside' );
 				return true;
 			}
 
 			if( _scrollable.get( 0 ).tagName == "BODY" ) {
-				$( window ).bind( "scroll.viewport" + $( this ).data( 'euid' ), function() {
-					callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
+				$( window ).bind( "scroll.viewport" + $this.data( 'euid' ), function() {
+					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
 				} );
 			} else {
-				_scrollable.bind( "scroll.viewport" + $( this ).data( 'euid' ), function() {
-					callBack.apply( $this, [ methods['getState'].apply( $this, [ settings ] ) ] );
+				_scrollable.bind( "scroll.viewport" + $this.data( 'euid' ), function() {
+					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
 				} );
 			}
 		} );
