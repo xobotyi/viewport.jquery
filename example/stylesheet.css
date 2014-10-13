@@ -23,7 +23,7 @@ html, body {
 
 .scrollable-wrapper, .ghost-wrapper {
     width: 45%;
-    height: 35%;
+    height: 40%;
     display: block;
     position: fixed;
     left: 5%;

@@ -1,0 +1,31 @@
+{
+	"name": "viewport",
+	"title": "jQuery.viewport",
+	"description": "Viewport - is simple jQuery plugin adds custom pseudo-selectors and handler for simple element detection inside or outside of viewport.",
+	"keywords": [
+		"animation",
+		"sprite"
+	],
+	"version": "0.1.0",
+	"author": {
+		"name": "Zinoviev Anton"
+	},
+	"maintainers": [
+		{
+			"name": "Zinoviev Anton",
+			"email": "xog3@yandex.ru"
+		}
+	],
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "https://github.com/xobotyi/jquery.viewport/blob/master/LICENSE"
+		}
+	],
+	"docs" : "https://github.com/xobotyi/jquery.viewport/blob/master/README.md",
+	"bugs": "https://github.com/xobotyi/jquery.viewport/issues",
+	"download": "https://github.com/xobotyi/jquery.viewport/releases",
+	"dependencies": {
+		"jquery": ">=2.0"
+	}
+}
