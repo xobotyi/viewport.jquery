@@ -30,6 +30,11 @@ $( ":partly-right-of-viewport" );
 $( ":have-scroll" );
 ```
 
+<blockquote><b>IMPORTANT!</b>
+<br/><br/>
+Note, that plugin uses scroll autodetector, which works incorrectly in some situations:
+If parent element don't have bounds( padding, border, overflow != visible ), children's margins flows to parent element, and offsetHeight calculates parent's height without these margins. While scrollHeight calculates content's height with these margins, so parent element recognises as having scroll and as viewport to current context.</blockquote>
+
 ## A bit closer
 
 Let's see each group of pseudo-selectors a little closer.
