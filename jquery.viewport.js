@@ -1,6 +1,5 @@
 /*
  * viewport - jQuery plugin for elements positioning in viewport
- * ver.: 0.1.0
  * (c) Copyright 2014, Anton Zinoviev aka xobotyi
  * Released under the MIT license
  */
@@ -154,8 +153,8 @@
 
 				if( _partlyLeft && _partlyRight ) {
 					ret.posX = 'exceeds';
-				} else if( ( _partlyLeft && !_partlyRight ) || ( _partlyRight && !_partlyLeft ) ) {
-					ret.posX = _partlyLeft ? 'partly-left' : 'partly-right';
+				} else if( ( _partlyLeft && !_partlyRight ) || ( _partlyLeft && !_partlyRight ) ) {
+					ret.posX = _partlyLeft ? 'partly-above' : 'partly-below';
 				} else if( !_left && !_right ) {
 					ret.posX = 'inside';
 				} else {
