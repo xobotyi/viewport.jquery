@@ -269,7 +269,7 @@
 			var _scrollable = $( $this ).parents( ':have-scroll' );
 
 			if( !_scrollable.length ) {
-				callBack.apply( obj, { "inside": true, "posY": '', "posX": '' } );
+				callBack.apply( obj, [ { "inside": true, "posY": '', "posX": '' } ] );
 				return true;
 			}
 
