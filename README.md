@@ -2,7 +2,7 @@
 
 Viewport - is simple jQuery plugin adds custom pseudo-selectors and handlers for simple element detection inside or outside of viewport.
 
-<b>Author:</b> Anton Zinoviev
+<b>Author:</b> Anton Zinoviev<br>
 <b>Requires:</b> jQuery 1.2.6+
 
 <img src="http://habrastorage.org/files/021/625/7eb/0216257ebf684f2f8d7ada92cda6c3c3.jpg"/>
