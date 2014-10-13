@@ -88,20 +88,37 @@ In Viewport plugin, this pseudo-selector uses for determining element's viewport
 
 ## Element's position tracker
 
-If you need continuous tracking of element's position, you can call plugin, on it.
+If you need continuous tracking of element's position, you can call plugin on it.
 
 ```javascript
 $( ".some-element" ).viewportTrace( function( state ){
     //your callback code
  }, {
     "threshold": 0,
-    "allowPartly": false,
-    "allowMixedStates": false
+    "allowPartly": false
  });
 ```
 
 The callback function is required, if you'll try to call plugin without callback function, exception will be generated.<br>
-Element's state returns in callback parameter.
+Element's state returns as callback parameter.<br>
+Return value is an object with 3 parameters:
+
+```javascript
+var res = { "inside": false, "posY": '', "posX": '' };
+```
+
+<code>inside</code> parameter is boolean, and becomes <code><i>true</i></code> if element is inside and completely fits the viewport, in that case <code>posY</code> and <code>posX</code> parameters are empty.
+Otherwise, if <code>inside</code> parameter returned as <code><i>false</i></code>, <code>posY</code> and <code>posX</code> parameters will return position of an element on the appropriate axis.
+
+<code>posY</code> and <code>posX</code> parameters can return the following values:
+<ul>
+ <li><b>inside</b> - in case the element completely fits in viewport on the appropriate axis,</li>
+ <li><b>exceeds</b> - in case element size exceeds viewport size on the appropriate axis,</li>
+ <li><b>above</b> - returns in <code>posY</code> parameter, if element's top side crossed viewport's top side,</li>
+ <li><b>below</b> - returns in <code>posY</code> parameter, if element's bottom side crossed viewport's bottom side,</li>
+ <li><b>left</b> - returns in <code>posX</code> parameter, if element's left side crossed viewport's left side,</li>
+ <li><b>right</b> - returns in <code>posX</code> parameter, if element's right side crossed viewport's right side.</li>
+</ul>
 
 #### Plugin options
 
@@ -109,38 +126,18 @@ Element's state returns in callback parameter.
 
 Threshold parameter was described above.
 
-##### allowPartly
-
-By default element can have 5 states:
-
-     <ul>
-         <li>inside</li>
-         <li>above</li>
-         <li>below</li>
-         <li>left</li>
-         <li>right</li>
-     </ul>
-     
-<blockquote>Note, that any type of <code>above</code> and <code>below</code> states have priority above <code>left</code> and <code>right</code> states.<br>
-<img src="http://habrastorage.org/files/3ea/308/683/3ea3086831d34d778f0618a026d626d7.jpg"/></blockquote>
+##### allowPartly    
 Turning on <code>allowPartly</code> option extends range of returning states with following:
 
-    <ul>
-         <li>partly-above</li>
-         <li>partly-below</li>
-         <li>partly-left</li>
-         <li>partly-right</li>
-     </ul>
+<ul>
+ <li><b>partly-above</b> - returns in <code>posY</code> parameter, if element's top side crossed viewport's top side, but bottom side didn't,</li>
+ <li><b>partly-below</b> - returns in <code>posY</code> parameter, if element's bottom side crossed viewport's bottom side, but top side didn't,</li>
+ <li><b>partly-left</b> - returns in <code>posX</code> parameter, if element's left side crossed viewport's left side, but right side didn't,</li>
+ <li><b>partly-right</b> - returns in <code>posX</code> parameter, if element's right side crossed viewport's right side, but left side didn't.</li>
+ </ul>
 
 <img src="http://habrastorage.org/files/d12/398/779/d1239877992d45c98e98e9a30f7bee0b.jpg"/>
 
-##### allowMixedStates
-
-Turns on mixing of different element-states.
-As previously, <code>above</code> and <code>below</code> states have priority above others, and "full" states goes before "partly" states, so return value looks like:<br>
-<code>above right</code><br>
-or<br>
-<code>right partly-below</code>
 
 ### Untie tracker
 
