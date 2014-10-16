@@ -6,15 +6,16 @@
  */
 (function( $ ) {
 	var methods = {
-		getElementPosition: function() {
+		getElementPosition: function( forceViewport ) {
 			var $this = $( this );
-			var _scrollableParent = $this.parents( ':have-scroll' );
+
+			var _scrollableParent = forceViewport ? $this.parents( forceViewport ) : $this.parents( ':have-scroll' );
 
 			if( !_scrollableParent.length ) {
 				return false;
 			}
 
-			var pos = methods['getRelativePosition'].call( this );
+			var pos = methods['getRelativePosition'].call( this, forceViewport );
 			var _topBorder = pos.top - _scrollableParent.scrollTop();
 			var _leftBorder = pos.left - _scrollableParent.scrollLeft();
 
@@ -28,120 +29,107 @@
 				"viewportWidth": _scrollableParent.width()
 			};
 		},
-		getRelativePosition: function() {
+		getRelativePosition: function( forceViewport ) {
 			var fromTop = 0;
 			var fromLeft = 0;
+			var $obj = null;
 
-			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( ':have-scroll' ); obj = obj.offsetParent ) {
-				fromTop += obj.offsetTop;
-				fromLeft += obj.offsetLeft;
+			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( forceViewport ? forceViewport : ':have-scroll' ); obj = $( obj ).parent().get(0) ) {
+				$obj = $( obj );
+				if( typeof $obj.data( 'pos' ) == 'undefined' || new Date().getTime() - $obj.data( 'pos' )[1] > 1000 ){
+					/*
+					* Making some kind of a cache system, it takes a bit of memory but helps us veeery much, reducing calculation
+					* */
+					fromTop += obj.offsetTop;
+					fromLeft += obj.offsetLeft;
+					$obj.data( 'pos', [ [ obj.offsetTop, obj.offsetLeft ], new Date().getTime() ] );
+				} else{
+					fromTop += $obj.data( 'pos' )[0][0];
+					fromLeft += $obj.data( 'pos' )[0][1];
+				}
 			}
 
 			return { "top": Math.round( fromTop ), "left": Math.round( fromLeft ) };
 		},
 		aboveTheViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemTopBorder - _threshold < 0 : false;
+			return pos ? pos.elemTopBorder - threshold < 0 : false;
 		},
 		partlyAboveTheViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemTopBorder - _threshold < 0
-				&& pos.elemBottomBorder - _threshold >= 0 : false;
+			return pos ? pos.elemTopBorder - threshold < 0
+				&& pos.elemBottomBorder - threshold >= 0 : false;
 		},
 		belowTheViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportHeight < pos.elemBottomBorder + _threshold : false;
+			return pos ? pos.viewportHeight < pos.elemBottomBorder + threshold : false;
 		},
 		partlyBelowTheViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportHeight < pos.elemBottomBorder + _threshold
-				&& pos.viewportHeight > pos.elemTopBorder + _threshold : false;
+			return pos ? pos.viewportHeight < pos.elemBottomBorder + threshold
+				&& pos.viewportHeight > pos.elemTopBorder + threshold : false;
 		},
 		leftOfViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemLeftBorder - _threshold <= 0 : false;
+			return pos ? pos.elemLeftBorder - threshold <= 0 : false;
 		},
 		partlyLeftOfViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.elemLeftBorder - _threshold < 0
-				&& pos.elemRightBorder - _threshold >= 0 : false;
+			return pos ? pos.elemLeftBorder - threshold < 0
+				&& pos.elemRightBorder - threshold >= 0 : false;
 		},
 		rightOfViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportWidth < pos.elemRightBorder + _threshold : false;
+			return pos ? pos.viewportWidth < pos.elemRightBorder + threshold : false;
 		},
 		partlyRightOfViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? pos.viewportWidth < pos.elemRightBorder + _threshold
-				&& pos.viewportWidth > pos.elemLeftBorder + _threshold : false;
+			return pos ? pos.viewportWidth < pos.elemRightBorder + threshold
+				&& pos.viewportWidth > pos.elemLeftBorder + threshold : false;
 		},
 		inViewport: function( threshold ) {
-			var _threshold = typeof threshold == 'string' ? parseInt( threshold, 10 ) : 0;
-
 			var pos = methods['getElementPosition'].call( this );
 
-			return pos ? !( pos.elemTopBorder - _threshold < 0 )
-				&& !( pos.viewportHeight < pos.elemBottomBorder + _threshold )
-				&& !( pos.elemLeftBorder - _threshold < 0 )
-				&& !( pos.viewportWidth < pos.elemRightBorder + _threshold ) : true;
+			return pos ? !( pos.elemTopBorder - threshold < 0 )
+				&& !( pos.viewportHeight < pos.elemBottomBorder + threshold )
+				&& !( pos.elemLeftBorder - threshold < 0 )
+				&& !( pos.viewportWidth < pos.elemRightBorder + threshold ) : true;
 		},
-		getState: function( options ) {
-			var settings = $.extend( {
-				"threshold": 0,
-				"allowPartly": false
-			}, options );
-
+		getState: function( threshold, forceViewport, allowPartly ) {
 			var ret = { "inside": false, "posY": '', "posX": '' };
-			var pos = methods['getElementPosition'].call( this );
+			var pos = methods['getElementPosition'].call( this, forceViewport );
 
 			if( !pos ) {
 				ret.inside = true;
 				return ret;
 			}
 
-			var _above = pos.elemTopBorder - settings.threshold < 0;
-			var _below = pos.viewportHeight < pos.elemBottomBorder + settings.threshold;
-			var _left = pos.elemLeftBorder - settings.threshold < 0;
-			var _right = pos.viewportWidth < pos.elemRightBorder + settings.threshold;
+			var _above = pos.elemTopBorder - threshold < 0;
+			var _below = pos.viewportHeight < pos.elemBottomBorder + threshold;
+			var _left = pos.elemLeftBorder - threshold < 0;
+			var _right = pos.viewportWidth < pos.elemRightBorder + threshold;
 
-			if( settings.allowPartly ) {
-				var _partlyAbove = pos.elemTopBorder - settings.threshold < 0 && pos.elemBottomBorder - settings.threshold >= 0;
-				var _partlyBelow = pos.viewportHeight < pos.elemBottomBorder + settings.threshold && pos.viewportHeight > pos.elemTopBorder + settings.threshold;
-				var _partlyLeft = pos.elemLeftBorder - settings.threshold < 0 && pos.elemRightBorder - settings.threshold >= 0;
-				var _partlyRight = pos.viewportWidth < pos.elemRightBorder + settings.threshold && pos.viewportWidth > pos.elemLeftBorder + settings.threshold;
+			if( allowPartly ) {
+				var _partlyAbove = pos.elemTopBorder - threshold < 0 && pos.elemBottomBorder - threshold >= 0;
+				var _partlyBelow = pos.viewportHeight < pos.elemBottomBorder + threshold && pos.viewportHeight > pos.elemTopBorder + threshold;
+				var _partlyLeft = pos.elemLeftBorder - threshold < 0 && pos.elemRightBorder - threshold >= 0;
+				var _partlyRight = pos.viewportWidth < pos.elemRightBorder + threshold && pos.viewportWidth > pos.elemLeftBorder + threshold;
 			}
-
 
 			if( !_above && !_below && !_left && !_right ) {
 				ret.inside = true;
 				return ret;
 			}
 
-			if( settings.allowPartly ) {
+			if( allowPartly ) {
 				if( _partlyAbove && _partlyBelow ) {
 					ret.posY = 'exceeds';
 				} else if( ( _partlyAbove && !_partlyBelow ) || ( _partlyBelow && !_partlyAbove ) ) {
@@ -197,31 +185,40 @@
 
 	$.extend( $.expr[':'], {
 		"in-viewport": function( obj, index, meta ) {
-			return methods['inViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['inViewport'].call( obj, _threshold );
 		},
 		"above-the-viewport": function( obj, index, meta ) {
-			return methods['aboveTheViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['aboveTheViewport'].call( obj, _threshold );
 		},
 		"below-the-viewport": function( obj, index, meta ) {
-			return methods['belowTheViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['belowTheViewport'].call( obj, _threshold );
 		},
 		"left-of-viewport": function( obj, index, meta ) {
-			return methods['leftOfViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['leftOfViewport'].call( obj, _threshold );
 		},
 		"right-of-viewport": function( obj, index, meta ) {
-			return methods['rightOfViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['rightOfViewport'].call( obj, _threshold );
 		},
 		"partly-above-the-viewport": function( obj, index, meta ) {
-			return methods['partlyAboveTheViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['partlyAboveTheViewport'].call( obj, _threshold );
 		},
 		"partly-below-the-viewport": function( obj, index, meta ) {
-			return methods['partlyBelowTheViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['partlyBelowTheViewport'].call( obj, _threshold );
 		},
 		"partly-left-of-viewport": function( obj, index, meta ) {
-			return methods['partlyLeftOfViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['partlyLeftOfViewport'].call( obj, _threshold );
 		},
 		"partly-right-of-viewport": function( obj, index, meta ) {
-			return methods['partlyRightOfViewport'].call( obj, meta[3] );
+			var _threshold = typeof meta[3] == 'string' ? parseInt( meta[3], 10 ) : 0;
+			return methods['partlyRightOfViewport'].call( obj, _threshold );
 		},
 		"have-scroll": function( obj ) {
 			return methods['haveScroll'].call( obj );
@@ -231,6 +228,7 @@
 	$.fn.viewportTrack = function( callBack, options ) {
 		var settings = $.extend( {
 			"threshold": 0,
+			"forceViewport": false,
 			"checkOnInit": true,
 			"allowPartly": false
 		}, options );
@@ -239,22 +237,32 @@
 			return this.each( function() {
 				var $this = $( this );
 
-				var _scrollable = $this.parent( ':have-scroll' );
-
-				if( !_scrollable.length || typeof $this.data( 'euid' ) == 'undefined' ) {
+				if( typeof $this.data( 'viewport_euid' ) == 'undefined' ) {
 					return true;
 				}
 
-				if( _scrollable.get( 0 ).tagName == "BODY" ) {
-					$( window ).unbind( ".viewport" + $this.data( 'euid' ) );
-					$this.removeData( 'euid' );
-				} else {
-					_scrollable.unbind( ".viewport" + $this.data( 'euid' ) );
-					$this.removeData( 'euid' );
+				var _scrollable = $( [] );
+
+				if( typeof $this.data( 'viewport' ) != 'undefined' ){
+					$this.data( 'viewport' ).forEach( function( val ){
+						_scrollable = $.extend( _scrollable, $this.parents( val ) );
+					} );
+				} else{
+					_scrollable = $.extend( _scrollable, $this.parents( ":have-scroll" ) );
 				}
+
+				_scrollable.each( function(){
+					if( $( this ).get( 0 ).tagName == "BODY" ) {
+						$( window ).unbind( ".viewport" + $this.data( 'viewport_euid' ) );
+					} else {
+						$( this ).unbind( ".viewport" + $this.data( 'viewport_euid' ) );
+					}
+				} );
+
+				$this.removeData( 'viewport_euid' );
 			} );
 		} else if( typeof callBack != 'function' ) {
-			$.error( 'Callback function not defined' );
+			$.error( 'Callback function not defined.' );
 			return this;
 		}
 
@@ -262,27 +270,39 @@
 			var $this = $( this );
 			var obj = this;
 
-			if( typeof $this.data( 'euid' ) == 'undefined' )
-				$this.data( 'euid', methods['generateEUID'].call() );
+			if( typeof $this.data( 'viewport_euid' ) == 'undefined' )
+				$this.data( 'viewport_euid', methods['generateEUID'].call() );
 
-			if( settings.checkOnInit ){
-				callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
+			if( settings.forceViewport ) {
+				if( typeof $this.data( 'viewport' ) == 'undefined' ) {
+					$this.data( 'viewport', [ settings.forceViewport ] );
+				} else {
+					$this.data( 'viewport' ).push( settings.forceViewport );
+				}
 			}
 
-			var _scrollable = $( $this ).parents( ':have-scroll' );
+			if( settings.checkOnInit ) {
+				callBack.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
+			}
+
+			var _scrollable = settings.forceViewport ? $( $this ).parents( settings.forceViewport ) : $( $this ).parents( ':have-scroll' );
 
 			if( !_scrollable.length ) {
+				if( settings.forceViewport ){
+					$.error( 'No such parent \''+settings.forceViewport+'\'' );
+				} else{
 				callBack.apply( obj, [ { "inside": true, "posY": '', "posX": '' } ] );
 				return true;
+				}
 			}
 
 			if( _scrollable.get( 0 ).tagName == "BODY" ) {
-				$( window ).bind( "scroll.viewport" + $this.data( 'euid' ), function() {
-					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
+				$( window ).bind( "scroll.viewport" + $this.data( 'viewport_euid' ), function() {
+					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
 				} );
 			} else {
-				_scrollable.bind( "scroll.viewport" + $this.data( 'euid' ), function() {
-					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings ] ) ] );
+				_scrollable.bind( "scroll.viewport" + $this.data( 'viewport_euid' ), function() {
+					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
 				} );
 			}
 		} );
