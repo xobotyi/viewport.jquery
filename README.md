@@ -99,16 +99,18 @@ In Viewport plugin, this pseudo-selector uses for determining element's viewport
 If you need continuous tracking of element's position, you can call plugin on it.
 
 ```javascript
-$( ".some-element" ).viewportTrace( function( state ){
-    //your callback code
- }, {
+$( ".some-element" ).viewportTrack( {
     "threshold": 0,
-    "checkOnInit": true,
-    "allowPartly": false
- });
+    "allowPartly": false,
+    "forceViewport": false,
+    "tracker": function( state ){
+        //your code
+    },
+    "checkOnInit": true
+} );
 ```
 
-The callback function is required, if you'll try to call plugin without callback function, exception will be generated.<br>
+The callback function is an optional parameter, if you'll call plugin without callback function, single position calculation will be made.<br>
 Element's state returns as callback parameter.<br>
 Return value is an object with 3 parameters:
 
@@ -147,6 +149,10 @@ Turning on <code>allowPartly</code> option extends range of returning states wit
 
 <img src="http://habrastorage.org/files/d12/398/779/d1239877992d45c98e98e9a30f7bee0b.jpg"/>
 
+##### forceViewport
+
+If you exactly know viewport's selector, you can specify it with this parameter.
+
 ##### checkOnInit
 By default, this option turned on, and tracker fires callback on initiantion. Turning this callback to <code>false</code> you can disable initial callback fire.
 
@@ -156,5 +162,5 @@ By default, this option turned on, and tracker fires callback on initiantion. Tu
 If there is no more need to track element, you can use "destroy" parameter.
 
 ```javascript
-$( ".some-element" ).viewportTrace('destroy');
+$( ".some-element" ).viewportTrack('destroy');
 ```
