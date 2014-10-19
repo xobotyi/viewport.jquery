@@ -1,6 +1,6 @@
 /*
  * viewport - jQuery plugin for elements positioning in viewport
- * ver.: 0.1.0
+ * ver.: 0.2
  * (c) Copyright 2014, Anton Zinoviev aka xobotyi
  * Released under the MIT license
  */
