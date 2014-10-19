@@ -34,16 +34,19 @@
 			var fromLeft = 0;
 			var $obj = null;
 
-			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( forceViewport ? forceViewport : ':have-scroll' ); obj = $( obj ).parent().get(0) ) {
+			for( var obj = $( this ).get( 0 ); obj && !$( obj ).is( forceViewport ? forceViewport : ':have-scroll' ); obj = $( obj ).parent().get( 0 ) ) {
 				$obj = $( obj );
-				if( typeof $obj.data( 'pos' ) == 'undefined' || new Date().getTime() - $obj.data( 'pos' )[1] > 1000 ){
+				if( typeof $obj.data( 'pos' ) == 'undefined' || new Date().getTime() - $obj.data( 'pos' )[1] > 1000 ) {
 					/*
-					* Making some kind of a cache system, it takes a bit of memory but helps us veeery much, reducing calculation
-					* */
+					 * Making some kind of a cache system, it takes a bit of memory but helps us veeery much, reducing calculation
+					 * */
 					fromTop += obj.offsetTop;
 					fromLeft += obj.offsetLeft;
-					$obj.data( 'pos', [ [ obj.offsetTop, obj.offsetLeft ], new Date().getTime() ] );
-				} else{
+					$obj.data( 'pos', [
+						[ obj.offsetTop, obj.offsetLeft ],
+						new Date().getTime()
+					] );
+				} else {
 					fromTop += $obj.data( 'pos' )[0][0];
 					fromLeft += $obj.data( 'pos' )[0][1];
 				}
@@ -225,86 +228,98 @@
 		}
 	} );
 
-	$.fn.viewportTrack = function( callBack, options ) {
-		var settings = $.extend( {
+	$.fn.viewportTrack = function( options ) {
+		var settings = {
 			"threshold": 0,
+			"allowPartly": false,
 			"forceViewport": false,
-			"checkOnInit": true,
-			"allowPartly": false
-		}, options );
+			"tracker": false,
+			"checkOnInit": true
+		};
 
-		if( typeof callBack == 'string' && callBack == 'destroy' ) {
-			return this.each( function() {
-				var $this = $( this );
+		if( typeof options == 'undefined' ) {
+			return methods['getState'].apply( this, [ settings.threshold, settings.forceViewport, settings.allowPartly ] );
+		} else if( typeof options == 'string' ) {
+			if( options == 'destroy' ) {
+				return this.each( function() {
+					var $this = $( this );
 
-				if( typeof $this.data( 'viewport_euid' ) == 'undefined' ) {
-					return true;
-				}
-
-				var _scrollable = $( [] );
-
-				if( typeof $this.data( 'viewport' ) != 'undefined' ){
-					$this.data( 'viewport' ).forEach( function( val ){
-						_scrollable = $.extend( _scrollable, $this.parents( val ) );
-					} );
-				} else{
-					_scrollable = $.extend( _scrollable, $this.parents( ":have-scroll" ) );
-				}
-
-				_scrollable.each( function(){
-					if( $( this ).get( 0 ).tagName == "BODY" ) {
-						$( window ).unbind( ".viewport" + $this.data( 'viewport_euid' ) );
-					} else {
-						$( this ).unbind( ".viewport" + $this.data( 'viewport_euid' ) );
+					if( typeof $this.data( 'viewport_euid' ) == 'undefined' ) {
+						return true;
 					}
-				} );
 
-				$this.removeData( 'viewport_euid' );
-			} );
-		} else if( typeof callBack != 'function' ) {
-			$.error( 'Callback function not defined.' );
-			return this;
-		}
+					var _scrollable = $( [] );
 
-		return this.each( function() {
-			var $this = $( this );
-			var obj = this;
+					if( typeof $this.data( 'viewport' ) != 'undefined' ) {
+						$this.data( 'viewport' ).forEach( function( val ) {
+							_scrollable = $.extend( _scrollable, $this.parents( val ) );
+						} );
+					} else {
+						_scrollable = $.extend( _scrollable, $this.parents( ":have-scroll" ) );
+					}
 
-			if( typeof $this.data( 'viewport_euid' ) == 'undefined' )
-				$this.data( 'viewport_euid', methods['generateEUID'].call() );
+					_scrollable.each( function() {
+						if( $( this ).get( 0 ).tagName == "BODY" ) {
+							$( window ).unbind( ".viewport" + $this.data( 'viewport_euid' ) );
+						} else {
+							$( this ).unbind( ".viewport" + $this.data( 'viewport_euid' ) );
+						}
+					} );
 
-			if( settings.forceViewport ) {
-				if( typeof $this.data( 'viewport' ) == 'undefined' ) {
-					$this.data( 'viewport', [ settings.forceViewport ] );
-				} else {
-					$this.data( 'viewport' ).push( settings.forceViewport );
-				}
-			}
-
-			if( settings.checkOnInit ) {
-				callBack.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
-			}
-
-			var _scrollable = settings.forceViewport ? $( $this ).parents( settings.forceViewport ) : $( $this ).parents( ':have-scroll' );
-
-			if( !_scrollable.length ) {
-				if( settings.forceViewport ){
-					$.error( 'No such parent \''+settings.forceViewport+'\'' );
-				} else{
-				callBack.apply( obj, [ { "inside": true, "posY": '', "posX": '' } ] );
-				return true;
-				}
-			}
-
-			if( _scrollable.get( 0 ).tagName == "BODY" ) {
-				$( window ).bind( "scroll.viewport" + $this.data( 'viewport_euid' ), function() {
-					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
+					$this.removeData( 'viewport_euid' );
 				} );
 			} else {
-				_scrollable.bind( "scroll.viewport" + $this.data( 'viewport_euid' ), function() {
-					callBack.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
+				$.error( 'Incorrect parameter value.' );
+				return this;
+			}
+		} else if( typeof options == 'object' ) {
+			$.extend( settings, options );
+
+			if( !settings.tracker && typeof settings.tracker != 'function' ) {
+				return methods['getState'].apply( this, [ settings.threshold, settings.forceViewport, settings.allowPartly ] );
+			} else {
+				return this.each( function() {
+					var $this = $( this );
+					var obj = this;
+
+					if( typeof $this.data( 'viewport_euid' ) == 'undefined' ) {
+						$this.data( 'viewport_euid', methods['generateEUID'].call() );
+					}
+
+					if( settings.forceViewport ) {
+						if( typeof $this.data( 'viewport' ) == 'undefined' ) {
+							$this.data( 'viewport', [ settings.forceViewport ] );
+						} else {
+							$this.data( 'viewport' ).push( settings.forceViewport );
+						}
+					}
+
+					if( settings.checkOnInit ) {
+						settings.tracker.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
+					}
+
+					var _scrollable = settings.forceViewport ? $this.parents( settings.forceViewport ) : $this.parents( ':have-scroll' );
+
+					if( !_scrollable.length ) {
+						if( settings.forceViewport ) {
+							$.error( 'No such parent \'' + settings.forceViewport + '\'' );
+						} else {
+							settings.tracker.apply( obj, [ { "inside": true, "posY": '', "posX": '' } ] );
+							return true;
+						}
+					}
+
+					if( _scrollable.get( 0 ).tagName == "BODY" ) {
+						$( window ).bind( "scroll.viewport" + $this.data( 'viewport_euid' ), function() {
+							settings.tracker.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
+						} );
+					} else {
+						_scrollable.bind( "scroll.viewport" + $this.data( 'viewport_euid' ), function() {
+							settings.tracker.apply( obj, [ methods['getState'].apply( obj, [ settings.threshold, settings.forceViewport, settings.allowPartly ] ) ] );
+						} );
+					}
 				} );
 			}
-		} );
+		}
 	};
 })( jQuery );
