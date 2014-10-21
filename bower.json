@@ -1,6 +1,6 @@
 {
 	"name": "xobotyi/jquery.viewport",
-	"version": "0.1.0",
+	"version": "0.2",
 	"main": "jquery.viewport.js",
 	"description": "Viewport - is simple jQuery plugin adds custom pseudo-selectors and handler for simple element detection inside or outside of viewport."
 }
