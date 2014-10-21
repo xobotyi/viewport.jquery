@@ -1,6 +1,25 @@
 {
-	"name": "xobotyi/jquery.viewport",
+	"name": "jquery-viewport",
 	"version": "0.2",
-	"main": "jquery.viewport.js",
-	"description": "Viewport - is simple jQuery plugin adds custom pseudo-selectors and handler for simple element detection inside or outside of viewport."
+	"homepage": "https://github.com/xobotyi/jquery.viewport",
+	"authors": [
+		"Anton Zinoviev"
+		],
+	"main": "jquery.viewport.min.js",
+	"description": "Viewport - is simple jQuery plugin adds custom pseudo-selectors and handler for simple element position detection inside or outside of viewport.",
+	"keywords": [
+		"jquery",
+		"viewport",
+		"selector",
+		"element",
+		"tracking",
+		"position"
+		],
+	"license": "MIT",
+	"ignore": [
+		"example/**",
+		"**/.*",
+		"*.jquery.json",
+		".git*"
+	]
 }
