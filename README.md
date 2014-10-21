@@ -8,6 +8,12 @@ Viewport - is simple jQuery plugin adds custom pseudo-selectors and handlers for
 <img src="http://habrastorage.org/files/021/625/7eb/0216257ebf684f2f8d7ada92cda6c3c3.jpg"/>
 
 ## How to use?
+Primary, you should download jQuery.viewport plugin, via <a href="https://github.com/xobotyi/jquery.viewport/releases/latest">GitHub</a>, or using Bower:
+
+```bash
+bower install jquery-viewport
+```
+
 Viewport depends on jQuery, include them wherever you want:
 
 ```html
