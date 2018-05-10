@@ -1,172 +1,135 @@
-# jquery.viewport
+<h1 align="center">viewport.jquery</h1>
 
-Viewport - is simple jQuery plugin adds custom pseudo-selectors and handlers for simple element detection inside or outside of viewport.
+## About
+**viewport** is simple but handy jQuery plugin adding methods and CSS selectors to check if element is in certain viewport.
+Furthermore - you will be able to check position relation of two separate elements even if the are not kins.
+Plugin uses [getBoundingClientRect()](https://caniuse.com/#search=getBoundingClientRect()) to determine elements positions so be sure it meets your browser support the requirements.
+] version 1.x.x uses different detection principe, which will work in almost any browser but works 10-30 times slower
 
-<b>Author:</b> Anton Zinoviev<br>
-<b>Requires:</b> jQuery 1.2.6+
+<img src="http://habrastorage.org/files/021/625/7eb/0216257ebf684f2f8d7ada92cda6c3c3.jpg#center"/>
 
-<img src="http://habrastorage.org/files/021/625/7eb/0216257ebf684f2f8d7ada92cda6c3c3.jpg"/>
+## Requirements
+* [jQuery](https://jquery.com) 3+ (written and tested with 3.3.1)
 
-## How to use?
-Primary, you should download jQuery.viewport plugin, via <a href="https://github.com/xobotyi/jquery.viewport/releases/latest">GitHub</a>, or using Bower:
-
+## Installation
+Download it from [GitHub](https://github.com/xobotyi/viewport.jquery/releases/latest), or install via NPM:
 ```bash
-bower install jquery-viewport
+npm i viewport.jquery
 ```
 
-Viewport depends on jQuery, include them wherever you want:
-
+Include it in your JS code or link it in html page
 ```html
-<script src="jquery.js" type="text/javascript"></script>
-<script src="jquery.viewport.js" type="text/javascript"></script>
+[script src="viewport.jquery.js" type="text/javascript"][/script]
 ```
 
-Now you able to use these pseudo-selectors anywhere in your code:
+Now you able to
+```javascript
+$(".myAwesomeElement:in-viewport").yaay();
+// or
+$(".myAwesomeElement").viewport().inViewport(); // true if in viewport
+```
+
+## Usage
+viewport.jquery provides you two different way of relation detection: [CSS pseudo-selectors](#css-pseudo-selectors) and [jQuery methods](#jquery-methods)
+
+### CSS pseudo-selectors
+All following selectors can be used _without_ parameters and bracket.
+
+**_threshold_** parameter must be an integer, it extends (if it positive) or reduces (if it negative) viewport sizes, but only in calculations.  
+<img src="http://habrastorage.org/files/6d3/76b/c65/6d376bc6567f4496a0a79e84c99e7c68.jpg#center"/>
+
+**_viewportSelector_** parameter must be a string, determines the selector of element that will be treated like a viewport, if more than one element corresponds given selector - the first one of them will be used. 
+Otherwise viewport will be found in element's parents, it will be first element that has scroll or the BODY element of none.  
+
+#### General
+```css
+:hasScroll
+:hasScrollVertical
+:hasScrollHorizontal
+```
+It will filter element if it has a scroll possibility, in meaning that element contents has bigger sizes than it's own.  
+
+```css
+:inViewport([ int threshold = 0 [, string viewportSelector ]])
+```
+It will filter the element if each it's border is within or equal viewport's borders.  
+
+#### Any side of element exceeds viewport's borders
+```css
+:aboveTheViewport([ int threshold = 0 [, string viewportSelector ]])
+:belowTheViewport([ int threshold = 0 [, string viewportSelector ]])
+:leftOfViewport([ int threshold = 0 [, string viewportSelector ]])
+:rightOfViewport([ int threshold = 0 [, string viewportSelector ]])
+```
+
+#### Any side of element is within viewport's borders
+```css
+:aboveTheViewportPartly([ int threshold = 0 [, string viewportSelector ]])
+:belowTheViewportPartly([ int threshold = 0 [, string viewportSelector ]])
+:leftOfViewportPartly([ int threshold = 0 [, string viewportSelector ]])
+:rightOfViewportPartly([ int threshold = 0 [, string viewportSelector ]])
+```
+
+#### Element exceeds viewport size and cant fit it
+```css
+:exceedsViewport([ int threshold = 0 [, string viewportSelector ]])
+:exceedsViewportVertical([ int threshold = 0 [, string viewportSelector ]])
+:exceedsViewportHorizontal([ int threshold = 0 [, string viewportSelector ]])
+```
+
+### jQuery methods
+```javascript
+$('').viewport().hasScroll();
+```
+Return `boolean`, representing if element has scroll;
 
 ```javascript
-$( ":in-viewport" );
-$( ":above-the-viewport" );
-$( ":below-the-viewport" );
-$( ":left-of-viewport" );
-$( ":right-of-viewport" );
-$( ":partly-above-the-viewport" );
-$( ":partly-below-the-viewport" );
-$( ":partly-left-of-viewport" );
-$( ":partly-right-of-viewport" );
-$( ":have-scroll" );
+$('').viewport().scrollableParent();
 ```
-
-<blockquote><b>IMPORTANT!</b>
-<br/><br/>
-Note, that plugin uses scroll autodetector, which works incorrectly in some situations:
-If parent element don't have bounds( padding, border, overflow != visible ), children's margins flows to parent element, and offsetHeight calculates parent's height without these margins. While scrollHeight calculates content's height with these margins, so parent element recognises as having scroll and as viewport to current context.</blockquote>
-
-## A bit closer
-
-Let's see each group of pseudo-selectors a little closer.
-
-##### Element fully fits into the viewport
+Return `HTMLElement`, representing first parent element that has scroll or BODY element oif none;
 
 ```javascript
-$( ":in-viewport" );
+$('').viewport().relativePosition([ viewport = undefined ]);
 ```
-
-This pseudo-selector returns <code><is>true</i></code> if element is inside and fully fits inside the viewport and returns <code><i>false</i></code> if any side of element extends beyond the viewport.
-
-##### Any side of element extends beyond the viewport
+_viewport_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
+Return `object`:  
+    `viewport` - reference to viewport element relations was calculated    
+    `viewportWidth` - viewport's width in pixels on calculation moment  
+    `viewportHeight` - viewport's height in pixels on calculation moment  
+    `element` - reference to element relations was calculated for  
+    `elementWidth` - element's width in pixels on calculation moment  
+    `elementHeight` - element's height in pixels on calculation moment  
+    `top` - distance in pixels from top border of element to top border of viewport  
+    `bottom` - distance in pixels from bottom border of element to bottom border of viewport  
+    `left` - distance in pixels from left border of element to left border of viewport  
+    `right` - distance in pixels from right border of element to right border of viewport  
 
 ```javascript
-$( ":above-the-viewport" );
-$( ":below-the-viewport" );
-$( ":left-of-viewport" );
-$( ":right-of-viewport" );
+$('').viewport().inViewport([ threshold = 0 [, viewport = undefined ]]);
 ```
-
-These pseudo-selectors returns <code><i>true</i></code> if the corresponding side of the element extends beyond the viewport, so if element's top side extends beyond the viewport's top border, this code:
-```javascript
-$( "element-selector" ).is( ":above-the-viewport" );
-```
-will return <code><i>true</i></code>.
-
-##### Any part of the element is within the viewport
+_threshold_ must be an integer, meaning as for CSS selectors;  
+_viewport_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
 
 ```javascript
-$( ":partly-above-the-viewport" );
-$( ":partly-below-the-viewport" );
-$( ":partly-left-of-viewport" );
-$( ":partly-right-of-viewport" );
+$('').viewport().getState([ threshold = 0 [, allowPartly = false [, viewport = undefined ]]]);
 ```
+_threshold_ must be an integer, meaning as for CSS selectors;  
+_allowPartly_ must be a boolean, allow 'partly' states. Extra calculations will be made if `true`   
+_viewport_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
+Return `object`:  
+    `inViewport` - boolean, is element fully fits viewport  
+    `vertical` - string, element's state along vertical axis relatively to viewport  
+    `horizontal` - string, element's state along horizontal axis relatively to viewport  
+    `viewport` - reference to viewport element relations was calculated    
+    `viewportWidth` - viewport's width in pixels on calculation moment  
+    `viewportHeight` - viewport's height in pixels on calculation moment  
+    `element` - reference to element relations was calculated for  
+    `elementWidth` - element's width in pixels on calculation moment  
+    `elementHeight` - element's height in pixels on calculation moment  
+    `top` - distance in pixels from top border of element to top border of viewport  
+    `bottom` - distance in pixels from bottom border of element to bottom border of viewport  
+    `left` - distance in pixels from left border of element to left border of viewport  
+    `right` - distance in pixels from right border of element to right border of viewport  
 
-Unlike previous group, these returns <code><i>true</i></code> if any part is within viewport, but, returns <code><i>false</i></code> if element fully fits into the viewport. Same, <code><i>false</i></code> value returns if element fully extends beyond the viewport.
-
-##### Threshold parameter
-
-Everything, listed earlier, pseudo-selectors have optional parameter, "threshold".<br>
-Threshold extends the viewport area with it's value.
-
-<img src="http://habrastorage.org/files/6d3/76b/c65/6d376bc6567f4496a0a79e84c99e7c68.jpg"/>
-
-```javascript
-$( ":in-viewport(20)" );
-```
-
-##### Element have scroll
-
-```javascript
-$( ":have-scroll" );
-```
-
-This pseudo-selector returns <code><i>true</i></code> if element have scrollbars, actually, it returns <code><i>true</i></code> if content's dimensions exceeds element's dimensions.<br>
-In Viewport plugin, this pseudo-selector uses for determining element's viewport, mostly, element's viewport - is parent element having the scrollbars.
-<blockquote><b>It is necessary to clarify</b> that, depending on the context, the viewport can be any DOM element, whose content size exceeds his own.</blockquote>
-
-## Element's position tracker
-
-If you need continuous tracking of element's position, you can call plugin on it.
-
-```javascript
-$( ".some-element" ).viewportTrack( {
-    "threshold": 0,
-    "allowPartly": false,
-    "forceViewport": false,
-    "tracker": function( state ){
-        //your code
-    },
-    "checkOnInit": true
-} );
-```
-
-The callback function is an optional parameter, if you'll call plugin without callback function, single position calculation will be made.<br>
-Element's state returns as callback parameter.<br>
-Return value is an object with 3 parameters:
-
-```javascript
-var res = { "inside": false, "posY": '', "posX": '' };
-```
-
-<code>inside</code> parameter is boolean, and becomes <code><i>true</i></code> if element is inside and completely fits the viewport, in that case <code>posY</code> and <code>posX</code> parameters are empty.
-Otherwise, if <code>inside</code> parameter returned as <code><i>false</i></code>, <code>posY</code> and <code>posX</code> parameters will return position of an element on the appropriate axis.
-
-<code>posY</code> and <code>posX</code> parameters can return the following values:
-<ul>
- <li><b>inside</b> - in case the element completely fits in viewport on the appropriate axis,</li>
- <li><b>exceeds</b> - in case element size exceeds viewport size on the appropriate axis,</li>
- <li><b>above</b> - returns in <code>posY</code> parameter, if element's top side crossed viewport's top side,</li>
- <li><b>below</b> - returns in <code>posY</code> parameter, if element's bottom side crossed viewport's bottom side,</li>
- <li><b>left</b> - returns in <code>posX</code> parameter, if element's left side crossed viewport's left side,</li>
- <li><b>right</b> - returns in <code>posX</code> parameter, if element's right side crossed viewport's right side.</li>
-</ul>
-
-#### Plugin options
-
-##### threshold
-
-Threshold parameter was described above.
-
-##### allowPartly    
-Turning on <code>allowPartly</code> option extends range of returning states with following:
-
-<ul>
- <li><b>partly-above</b> - returns in <code>posY</code> parameter, if element's top side crossed viewport's top side, but bottom side didn't,</li>
- <li><b>partly-below</b> - returns in <code>posY</code> parameter, if element's bottom side crossed viewport's bottom side, but top side didn't,</li>
- <li><b>partly-left</b> - returns in <code>posX</code> parameter, if element's left side crossed viewport's left side, but right side didn't,</li>
- <li><b>partly-right</b> - returns in <code>posX</code> parameter, if element's right side crossed viewport's right side, but left side didn't.</li>
- </ul>
-
-<img src="http://habrastorage.org/files/d12/398/779/d1239877992d45c98e98e9a30f7bee0b.jpg"/>
-
-##### forceViewport
-
-If you exactly know viewport's selector, you can specify it with this parameter.
-
-##### checkOnInit
-By default, this option turned on, and tracker fires callback on initiantion. Turning this callback to <code>false</code> you can disable initial callback fire.
-
-
-### Untie tracker
-
-If there is no more need to track element, you can use "destroy" parameter.
-
-```javascript
-$( ".some-element" ).viewportTrack('destroy');
-```
+_vertical_ field can be: `inside`, `exceeds`, `top`, `partly-top`, `below`, `partly-below`
+_horizontal_ field can be: `inside`, `exceeds`, `left`, `partly-left`, `right`, `partly-right`  
