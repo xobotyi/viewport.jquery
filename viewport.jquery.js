@@ -27,12 +27,12 @@
 
         return {
             viewport,
-            viewportWidth:  vpRect.width,
-            viewportHeight: vpRect.height,
+            viewportWidth:  vpRect.width * 1,
+            viewportHeight: vpRect.height * 1,
 
             element,
-            elementWidth:  elRect.width,
-            elementHeight: elRect.height,
+            elementWidth:  elRect.width * 1,
+            elementHeight: elRect.height * 1,
 
             top:    elRect.top - vpRect.top,
             bottom: vpRect.bottom - elRect.bottom,
@@ -129,6 +129,12 @@
     $.extend($.expr[':'], {
         hasScroll(element) {
             return hasScroll(element);
+        },
+        hasScrollVertical(element) {
+            return element.offsetHeight < element.scrollHeight;
+        },
+        hasScrollHorizontal(element) {
+            return element.offsetWidth < element.scrollWidth;
         },
         inViewport(element, i, meta) {
             let param     = (meta[3] || '').split(','),
