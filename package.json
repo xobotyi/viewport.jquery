@@ -10,6 +10,10 @@
     "jquery-plugin",
     "viewport",
     "jquery",
-    "selector"
+    "selector",
+    "pseudo-selectors",
+    "jquery-plugin",
+    "element-position",
+    "element-viewport"
   ]
 }
