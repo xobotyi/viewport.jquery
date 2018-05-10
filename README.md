@@ -1,4 +1,16 @@
 <h1 align="center">viewport.jquery</h1>
+<p align="center">
+    <a href="https://npmjs.com/package/viewport.jquery">
+        <img src="https://img.shields.io/npm/v/viewport.jquery.svg" alt="NPM version" />
+    </a>
+    <a href="https://npmjs.org/package/viewport.jquery">
+        <img src="https://img.shields.io/npm/dm/viewport.jquery.svg" alt="NPM downloads" />
+    </a>
+    <a href="https://npmjs.org/package/viewport.jquery">
+        <img src="https://img.shields.io/npm/l/viewport.jquery.svg" alt="License" />
+    </a>
+</p>
+
 
 ## About
 **viewport** is simple but handy jQuery plugin adding methods and CSS selectors to check if element is in certain viewport.
