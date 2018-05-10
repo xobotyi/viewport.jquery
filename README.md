@@ -81,55 +81,60 @@ It will filter the element if each it's border is within or equal viewport's bor
 ```javascript
 $('').viewport().hasScroll();
 ```
-Return `boolean`, representing if element has scroll;
+**Return:** `boolean`, representing if element has scroll;
 
 ```javascript
 $('').viewport().scrollableParent();
 ```
-Return `HTMLElement`, representing first parent element that has scroll or BODY element oif none;
+**Return:**  
+`HTMLElement`, representing first parent element that has scroll or BODY element oif none;
 
 ```javascript
 $('').viewport().relativePosition([ viewport = undefined ]);
 ```
-_viewport_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
-Return `object`:  
-    `viewport` - reference to viewport element relations was calculated    
-    `viewportWidth` - viewport's width in pixels on calculation moment  
-    `viewportHeight` - viewport's height in pixels on calculation moment  
-    `element` - reference to element relations was calculated for  
-    `elementWidth` - element's width in pixels on calculation moment  
-    `elementHeight` - element's height in pixels on calculation moment  
-    `top` - distance in pixels from top border of element to top border of viewport  
-    `bottom` - distance in pixels from bottom border of element to bottom border of viewport  
-    `left` - distance in pixels from left border of element to left border of viewport  
-    `right` - distance in pixels from right border of element to right border of viewport  
+_**viewport**_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
+
+**Return:**
+`object`:  
+&nbsp;&nbsp;&nbsp;&nbsp;`viewport` - reference to viewport element relations was calculated    
+&nbsp;&nbsp;&nbsp;&nbsp;`viewportWidth` - viewport's width in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`viewportHeight` - viewport's height in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`element` - reference to element relations was calculated for  
+&nbsp;&nbsp;&nbsp;&nbsp;`elementWidth` - element's width in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`elementHeight` - element's height in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`top` - distance in pixels from top border of element to top border of viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`bottom` - distance in pixels from bottom border of element to bottom border of viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`left` - distance in pixels from left border of element to left border of viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`right` - distance in pixels from right border of element to right border of viewport  
 
 ```javascript
 $('').viewport().inViewport([ threshold = 0 [, viewport = undefined ]]);
 ```
-_threshold_ must be an integer, meaning as for CSS selectors;  
-_viewport_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
+_**threshold**_ must be an integer, meaning as for CSS selectors;  
+_**viewport**_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
 
 ```javascript
 $('').viewport().getState([ threshold = 0 [, allowPartly = false [, viewport = undefined ]]]);
 ```
-_threshold_ must be an integer, meaning as for CSS selectors;  
-_allowPartly_ must be a boolean, allow 'partly' states. Extra calculations will be made if `true`   
-_viewport_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
-Return `object`:  
-    `inViewport` - boolean, is element fully fits viewport  
-    `vertical` - string, element's state along vertical axis relatively to viewport  
-    `horizontal` - string, element's state along horizontal axis relatively to viewport  
-    `viewport` - reference to viewport element relations was calculated    
-    `viewportWidth` - viewport's width in pixels on calculation moment  
-    `viewportHeight` - viewport's height in pixels on calculation moment  
-    `element` - reference to element relations was calculated for  
-    `elementWidth` - element's width in pixels on calculation moment  
-    `elementHeight` - element's height in pixels on calculation moment  
-    `top` - distance in pixels from top border of element to top border of viewport  
-    `bottom` - distance in pixels from bottom border of element to bottom border of viewport  
-    `left` - distance in pixels from left border of element to left border of viewport  
-    `right` - distance in pixels from right border of element to right border of viewport  
+_**threshold**_ must be an integer, meaning as for CSS selectors;  
+_**allowPartly**_ must be a boolean, allow 'partly' states. Extra calculations will be made if `true`   
+_**viewport**_ can be both `HTMLElement` or `jQuery object`, meaning as for CSS selectors;  
+
+**Return:**  
+`object`:  
+&nbsp;&nbsp;&nbsp;&nbsp;`inViewport` - boolean, is element fully fits viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`vertical` - string, element's state along vertical axis relatively to viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`horizontal` - string, element's state along horizontal axis relatively to viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`viewport` - reference to viewport element relations was calculated    
+&nbsp;&nbsp;&nbsp;&nbsp;`viewportWidth` - viewport's width in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`viewportHeight` - viewport's height in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`element` - reference to element relations was calculated for  
+&nbsp;&nbsp;&nbsp;&nbsp;`elementWidth` - element's width in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`elementHeight` - element's height in pixels on calculation moment  
+&nbsp;&nbsp;&nbsp;&nbsp;`top` - distance in pixels from top border of element to top border of viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`bottom` - distance in pixels from bottom border of element to bottom border of viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`left` - distance in pixels from left border of element to left border of viewport  
+&nbsp;&nbsp;&nbsp;&nbsp;`right` - distance in pixels from right border of element to right border of viewport  
 
 _vertical_ field can be: `inside`, `exceeds`, `top`, `partly-top`, `below`, `partly-below`
 _horizontal_ field can be: `inside`, `exceeds`, `left`, `partly-left`, `right`, `partly-right`  
