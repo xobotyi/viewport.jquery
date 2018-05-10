@@ -4,302 +4,225 @@
  * @License: http://www.opensource.org/licenses/mit-license.php
  */
 (function ($) {
-    /**
-     * @param v {*}
-     * @returns {boolean}
-     */
-    function isString(v) {
-        return typeof v === 'string';
+    /** @return boolean */
+    function hasScroll(element) {
+        return element ? element.offsetHeight < element.scrollHeight || element.offsetWidth < element.scrollWidth : false;
     }
 
-    /**
-     * @param v {*}
-     * @returns {boolean}
-     */
-    function isset(v) {
-        return v !== null && typeof v !== 'undefined';
+    /** @return HTMLElement */
+    function getScrollableParent(element) {
+        if (!element) { return window.document.body; }
+
+        while (element.tagName !== 'BODY' && !hasScroll(element)) {
+            element = element.parentElement;
+        }
+
+        return element;
     }
 
-    let methods = {
-        getRelativePosition($el, viewportSelector = ':hasScroll', $viewport = null) {
-            let top  = 0,
-                left = 0,
-                obj;
+    /** @return {top, bottom, left, right, width, height, viewportWidth, viewportHeight} */
+    function getRelativePosition(element, viewport) {
+        let vpRect = viewport ? viewport.getBoundingClientRect() : {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0},
+            elRect = element ? element.getBoundingClientRect() : {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0};
 
-            for (let $obj = $el; $obj.length; $obj = $obj.parent()) {
-                obj = $obj[0];
-                if (($viewport && $viewport[0] === obj) || $obj.is(viewportSelector)) {break;}
+        return {
+            viewport,
+            viewportWidth:  vpRect.width,
+            viewportHeight: vpRect.height,
 
-                if (!isset(obj.vpPos) || Date.now() - obj.vpPos.tag > 500) {
-                    // small cache to improve performance
-                    top += obj.offsetTop;
-                    left += obj.offsetLeft;
+            element,
+            elementWidth:  elRect.width,
+            elementHeight: elRect.height,
 
-                    obj.vpPos = {top, left, tag: Date.now()};
-                }
-                else {
-                    top += obj.vpPos.top;
-                    left += obj.vpPos.left;
-                }
-            }
+            top:    elRect.top - vpRect.top,
+            bottom: vpRect.bottom - elRect.bottom,
+            left:   elRect.left - vpRect.left,
+            right:  vpRect.right - elRect.right,
+        };
+    }
 
-            return {top: Math.round(top), left: Math.round(left)};
-        },
-        getPosition($el, viewportSelector = ':hasScroll') {
-            $el = $el instanceof $ ? $el : $($el);
+    /** @return boolean */
+    function inViewport(element, threshold = 0, viewport) {
+        let pos = getRelativePosition(element, viewport);
 
-            let $viewport = $el.parents(viewportSelector).last();
+        return pos.top - threshold >= 0 && pos.bottom - threshold >= 0 && pos.left - threshold >= 0 && pos.right - threshold >= 0;
+    }
 
-            if (!$viewport.length) {
-                return false;
-            }
+    /** @return {inViewport, vertical, horizontal, top, bottom, left, right, width, height, viewportWidth, viewportHeight}  */
+    function getState(element, threshold = 0, allowPartly = false, viewport) {
+        let pos = getRelativePosition(element, viewport);
 
-            let pos        = this.getRelativePosition($el, null, $viewport),
-                topBorder  = pos.top - $viewport.scrollTop(),
-                leftBorder = pos.left - $viewport.scrollLeft();
+        pos.inViewport = pos.top - threshold >= 0 && pos.bottom - threshold >= 0 && pos.left - threshold >= 0 && pos.right - threshold >= 0;
 
-            return {
-                borderTop:    topBorder,
-                borderLeft:   leftBorder,
-                borderBottom: topBorder + $el.height(),
-                borderRight:  leftBorder + $el.width(),
+        if (pos.top - threshold >= 0 && pos.bottom - threshold >= 0) {
+            pos.vertical = 'inside';
+        }
+        else if (pos.top - threshold <= 0 && pos.bottom - threshold <= 0) {
+            pos.vertical = 'exceeds';
+        }
+        else if (allowPartly) {
+            pos.vertical = pos.top - threshold <= 0
+                           ? (pos.bottom - threshold - pos.viewportHeight) > pos.elementHeight ? 'above' : 'partly-above'
+                           : (pos.top - threshold - pos.viewportHeight) > pos.elementHeight ? 'below' : 'partly-below';
+        }
+        else {
+            pos.vertical = pos.top - threshold <= 0 ? 'above' : 'below';
+        }
 
-                viewport:       $viewport,
-                viewportHeight: $viewport.height(),
-                viewportWidth:  $viewport.width(),
-            };
-        },
+        if (pos.left - threshold >= 0 && pos.right - threshold >= 0) {
+            pos.horizontal = 'inside';
+        }
+        else if (pos.left - threshold <= 0 && pos.right - threshold <= 0) {
+            pos.horizontal = 'exceeds';
+        }
+        else if (allowPartly) {
+            pos.horizontal = pos.left - threshold <= 0
+                             ? (pos.right - threshold - pos.viewportWidth) > pos.elementWidth ? 'left' : 'partly-left'
+                             : (pos.left - threshold - pos.viewportWidth) > pos.elementWidth ? 'right' : 'partly-right';
+        }
+        else {
+            pos.horizontal = pos.top - threshold <= 0 ? 'left' : 'right';
+        }
 
-        isAbove(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.borderTop - threshold < 0 : false;
-        },
-        isBelow(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.borderBottom - threshold < 0 : false;
-        },
-        isLeftOf(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.borderLeft - threshold < 0 : false;
-        },
-        isRightOf(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.borderRight - threshold < 0 : false;
-        },
+        return pos;
+    }
 
-        isPartlyAbove(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.borderTop - threshold < 0 && pos.borderBottom - threshold >= 0
-                       : false;
-        },
-        isPartlyBelow(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.viewportHeight < pos.borderBottom + threshold && pos.viewportHeight > pos.borderTop + threshold
-                       : false;
-        },
-        isPartlyLeftOf(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.borderLeft - threshold < 0 && pos.borderRight - threshold >= 0 :
-                   false;
-        },
-        isPartlyRightOf(el, threshold = 0) {
-            let pos = this.getPosition(el);
-            return pos ? pos.viewportWidth < pos.borderRight + threshold && pos.viewportWidth > pos.borderLeft + threshold
-                       : false;
+    let viewportFunctions = {
+        /** @return boolean */
+        hasScroll() {
+            if (!this.length) { return false; }
+
+            return hasScroll(this[0]);
         },
 
-        isInViewport(el, threshold = 0) {
-            let pos = this.getPosition(el);
-
-            return pos ? !(pos.borderTop - threshold < 0)
-                         && !(pos.viewportHeight < pos.borderBottom + threshold)
-                         && !(pos.borderLeft - threshold < 0)
-                         && !(pos.viewportWidth < pos.borderRight + threshold) : true;
+        /** @return HTMLElement */
+        scrollableParent() {
+            return getScrollableParent(this[0]);
         },
 
-        getState(el, threshold = 0, viewportSelector = ':hasScroll', $viewport = null, allowPartly = false) {
-            let res = {"inside": false, "posY": '', "posX": ''},
-                pos = this.getPosition(el, viewportSelector);
-
-            if (!pos) {
-                res.inside = true;
-                return res;
-            }
-
-            let _above = pos.borderTop - threshold < 0,
-                _below = pos.viewportHeight < pos.borderBottom + threshold,
-                _left  = pos.borderLeft - threshold < 0,
-                _right = pos.viewportWidth < pos.borderRight + threshold,
-                _partlyAbove,
-                _partlyBelow,
-                _partlyLeft,
-                _partlyRight;
-
-            if (!_above && !_below && !_left && !_right) {
-                res.inside = true;
-                return res;
-            }
-
-            if (allowPartly) {
-                _partlyAbove = pos.borderTop - threshold < 0 && pos.borderBottom - threshold >= 0;
-                _partlyBelow = pos.viewportHeight < pos.borderBottom + threshold && pos.viewportHeight > pos.borderTop + threshold;
-                _partlyLeft = pos.borderLeft - threshold < 0 && pos.borderRight - threshold >= 0;
-                _partlyRight = pos.viewportWidth < pos.borderRight + threshold && pos.viewportWidth > pos.borderLeft + threshold;
-
-                if (_partlyAbove && _partlyBelow) {
-                    res.posY = 'exceeds';
-                }
-                else if ((_partlyAbove && !_partlyBelow) || (_partlyBelow && !_partlyAbove)) {
-                    res.posY = _partlyAbove ? 'partly-above' : 'partly-below';
-                }
-                else if (!_above && !_below) {
-                    res.posY = 'inside';
-                }
-                else {
-                    res.posY = _above ? 'above' : 'below';
-                }
-
-                if (_partlyLeft && _partlyRight) {
-                    res.posX = 'exceeds';
-                }
-                else if ((_partlyLeft && !_partlyRight) || (_partlyLeft && !_partlyRight)) {
-                    res.posX = _partlyLeft ? 'partly-above' : 'partly-below';
-                }
-                else if (!_left && !_right) {
-                    res.posX = 'inside';
-                }
-                else {
-                    res.posX = _left ? 'left' : 'right';
-                }
-            }
-            else {
-                if (_above && _below) {
-                    res.posY = 'exceeds';
-                }
-                else if (!_above && !_below) {
-                    res.posY = 'inside';
-                }
-                else {
-                    res.posY = _above ? 'above' : 'below';
-                }
-
-                if (_left && _right) {
-                    res.posX = 'exceeds';
-                }
-                else if (!_left && !_right) {
-                    res.posX = 'inside';
-                }
-                else {
-                    res.posX = _left ? 'left' : 'right';
-                }
-            }
-
-            return res;
+        /** @return {top, bottom, left, right, width, height, viewportWidth, viewportHeight} */
+        relativePosition(viewport = this.scrollableParent()) {
+            return getRelativePosition(this[0], viewport ? (viewport instanceof $ ? viewport[0] : viewport) : this.scrollableParent());
         },
 
-        hasScroll(el) {
-            return (el.scrollHeight > el.offsetHeight || el.scrollWidth > el.offsetWidth);
+        /** @return boolean */
+        inViewport(threshold = 0, viewport) {
+            if (!this.length) { return false; }
+
+            return inViewport(this[0], threshold, viewport || this.scrollableParent());
         },
+
+        /** @return {inViewport, vertical, horizontal, top, bottom, left, right, width, height, viewportWidth, viewportHeight}  */
+        getState(threshold = 0, allowPartly = false, viewport) {
+            viewport = viewport || this.scrollableParent();
+
+            if (!this.length) { return {inViewport: false, vertical: 'inside', horizontal: 'inside', top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, viewportWidth: 0, viewportHeight: 0}; }
+
+            return getState(this[0], threshold, allowPartly, viewport);
+        },
+    };
+
+    $.fn.viewport = function () {
+        return {...this, ...viewportFunctions};
     };
 
     $.extend($.expr[':'], {
-        "inViewport"(obj, index, meta) {
-            return methods.isInViewport(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        hasScroll(element) {
+            return hasScroll(element);
         },
-        "aboveTheViewport"(obj, index, meta) {
-            return methods.isAbove(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        inViewport(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined;
+
+            return inViewport(element, threshold, viewport || getScrollableParent(element));
         },
-        "belowTheViewport"(obj, index, meta) {
-            return methods.isBelow(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        aboveTheViewport(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.top - threshold <= 0 && pos.bottom >= 0;
         },
-        "leftOfViewport"(obj, index, meta) {
-            return methods.isLeftOf(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        belowTheViewport(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.bottom - threshold <= 0 && pos.top >= 0;
         },
-        "rightOfViewport"(obj, index, meta) {
-            return methods.isRightOf(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        leftOfViewport(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.left - threshold <= 0 && pos.right >= 0;
         },
-        "aboveTheViewportPartly"(obj, index, meta) {
-            return methods.isPartlyAbove(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        rightOfViewport(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.right - threshold <= 0 && pos.left >= 0;
         },
-        "belowTheViewportPartly"(obj, index, meta) {
-            return methods.isPartlyBelow(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        aboveTheViewportPartly(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.top - threshold <= 0 && pos.bottom >= 0 && (pos.bottom - threshold - pos.viewportHeight) > pos.elementHeight;
         },
-        "leftOfViewportPartly"(obj, index, meta) {
-            return methods.isPartlyLeftOf(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        belowTheViewportPartly(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.bottom - threshold <= 0 && pos.top >= 0 && (pos.top - threshold - pos.viewportHeight) > pos.elementHeight;
         },
-        "rightOfViewportPartly"(obj, index, meta) {
-            return methods.isPartlyRightOf(obj, isString(meta[3]) ? parseInt(meta[3], 10) : 0);
+        leftOfViewportPartly(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.left - threshold <= 0 && pos.right >= 0 && (pos.left - threshold - pos.viewportWidth) > pos.elementWidth;
         },
-        "hasScroll"(obj) {
-            return methods.hasScroll(obj);
+        rightOfViewportPartly(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.right - threshold <= 0 && pos.left >= 0 && (pos.right - threshold - pos.viewportWidth) > pos.elementWidth;
+        },
+        exceedsViewport(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined;
+
+            return !inViewport(element, threshold, viewport || getScrollableParent(element));
+        },
+        exceedsViewportVertical(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.top - threshold < 0 && pos.bottom - threshold < 0;
+        },
+        exceedsViewportHorizontal(element, i, meta) {
+            let param     = (meta[3] || '').split(','),
+                threshold = (param[0] && (param[0] = param[0].trim())) ? parseInt(param[0], 10) : 0,
+                viewport  = (param[1] && (param[1] = param[1].trim())) ? ($(param[1])[0] || undefined) : undefined,
+                pos       = getRelativePosition(element, viewport || getScrollableParent(element));
+
+            return pos.left - threshold < 0 && pos.right - threshold < 0;
         },
     });
-
-    $.fn.viewportTrack = function (opt) {
-        let cfg = {
-            tracker:          undefined,
-            threshold:        0,
-            allowPartly:      false,
-            viewportSelector: ':hasScroll',
-            viewportElement:  undefined,
-            triggerOnInit:    true,
-        };
-
-        if (!isset(opt)) {
-            return methods.getState(this, cfg.threshold, cfg.viewportSelector, cfg.viewportElement, cfg.allowPartly);
-        }
-
-        if (isString(opt)) {
-            switch (opt) {
-                case "unbind":
-                    return this.each((n, i) => {
-                        if (!isset(i.vpViewports)) {return;}
-
-                        for (let cb of i.vpViewports) {
-                            if (cb[0][0].tagName === "BODY") {
-                                window.removeEventListener('scroll', cb[1]);
-                            }
-                            else {
-                                cb[0][0].removeEventListener('scroll', cb[1]);
-                            }
-                        }
-
-                        i.vpViewports = undefined;
-                    });
-
-                default:
-                    throw new Error(`Invalid command "${opt}" for jQuery.viewportTrack`);
-            }
-        }
-        else if (typeof opt === 'object') {
-            cfg = {...cfg, ...opt};
-
-            if (typeof cfg.tracker !== 'function') {
-                throw new Error(`tracker option has to be a function, got ${typeof cfg.tracker}`);
-            }
-
-            return this.each((n, i) => {
-                let $i = $(i);
-
-                cfg.viewportElement = cfg.viewportElement || $i.parents(cfg.viewportSelector).last();
-
-                let cb = function () {
-                    cfg.tracker.call(i, methods.getState(i, cfg.threshold, cfg.viewportSelector, cfg.viewportElement, cfg.allowPartly));
-                };
-
-                (i.vpViewports = i.vpViewports || []).push([cfg.viewportElement, cb]);
-
-                if (cfg.triggerOnInit) {cb();}
-
-                if (cfg.viewportElement[0].tagName === "BODY") {
-                    window.addEventListener('scroll', cb, {passive: true});
-                }
-                else {
-                    cfg.viewportElement[0].addEventListener('scroll', cb, {passive: true});
-                }
-            });
-        }
-
-        return this;
-    };
 })(jQuery);

@@ -1,27 +1,20 @@
 * {
-    margin:                 0;
-    padding:                0;
-    box-sizing:             border-box;
-    text-decoration:        none;
-    outline:                none;
-    vertical-align:         baseline;
-    -webkit-font-smoothing: subpixel-antialiased;
-    font-smoothing:         subpixel-antialiased;
-    -webkit-transform:      translatez(0);
-    -moz-transform:         translatez(0);
-    -ms-transform:          translatez(0);
-    -o-transform:           translatez(0);
-    transform:              translatez(0);
+    margin:          0;
+    padding:         0;
+    box-sizing:      border-box;
+    text-decoration: none;
+    outline:         none;
+    vertical-align:  baseline;
 }
 
 html, body {
-    width:    100%;
-    height:   100%;
+    width:    100vw;
+    height:   100vh;
     position: relative;
     overflow: hidden;
 }
 
-.scrollable-wrapper, .ghost-wrapper {
+#wrapperScrollable, #wrapperGhost {
     width:         45%;
     height:        40%;
     display:       block;
@@ -33,14 +26,14 @@ html, body {
     z-index:       2;
 }
 
-.scrollable-wrapper {
+#wrapperScrollable {
     top:    0;
     bottom: 0;
     margin: auto 0;
     resize: vertical;
 }
 
-.ghost-wrapper {
+#wrapperGhost {
     height:        auto;
     width:         calc(45% - 17px);
     border-radius: 10px;
@@ -49,67 +42,16 @@ html, body {
     z-index:       1;
 }
 
-.scrollable-wrapper .element, .ghost-wrapper .element {
+#wrapperScrollable .element, #wrapperGhost .element {
     display:       block;
-    position:      relative;
-    width:         480px;
-    height:        170px;
-    margin-bottom: 20px;
-    margin-left:   20%;
+    width:         420px;
+    height:        150px;
+    margin:        0 auto 20px;
     border-radius: 10px;
     background:    rgba(0, 0, 0, .25);
     box-shadow:    inset 1px 1px 5px rgba(0, 0, 0, .2);
 }
 
-.scrollable-wrapper .element:first-child, .ghost-wrapper .element:first-child {
+#wrapperScrollable .element:first-child, #wrapperGhost .element:first-child {
     margin-top: 20px;
-}
-
-.scrollable-wrapper span, .ghost-wrapper span {
-    display:        inline-block;
-    position:       absolute;
-    width:          100%;
-    height:         30px;
-    font-family:    Tahoma, sans-serif;
-    font-weight:    bold;
-    font-size:      24px;
-    line-height:    30px;
-    text-transform: uppercase;
-    color:          rgba(0, 0, 0, .25);
-    text-align:     center;
-    top:            50%;
-    margin-top:     -15px;
-    z-index:        100;
-}
-
-.scrollable-wrapper .sub-element, .ghost-wrapper .sub-element {
-    display:       block;
-    position:      absolute;
-    width:         90%;
-    margin-left:   5%;
-    margin-top:    5%;
-    height:        75%;
-    background:    #7D2C2B;
-    box-shadow:    1px 1px 5px rgba(0, 0, 0, .2);
-    border-radius: 5px 5px 0 0;
-    z-index:       50;
-}
-
-.ghost-wrapper .sub-element {
-    background: #DFDFDF;
-}
-
-.message {
-    display:     block;
-    position:    absolute;
-    top:         10%;
-    right:       5%;
-    width:       40%;
-    height:      90%;
-    font-family: Tahoma, sans-serif;
-    font-size:   16px;
-}
-
-.message pre {
-    font-size: 13px;
 }
