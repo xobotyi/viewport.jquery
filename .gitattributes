@@ -1,3 +1,2 @@
 example/ export-ignore
-phpunit.xml.dist export-ignore
-.travis.yml export-ignore
+node_modules/ export-ignore
