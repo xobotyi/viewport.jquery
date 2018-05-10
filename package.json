@@ -1,6 +1,6 @@
 {
   "name": "viewport.jquery",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "jQuery plugin adding selectors to find and handle element relatively to viewport",
   "license": "MIT",
   "author": "Anton Zinovyev <xog3@yandex.ru>",
