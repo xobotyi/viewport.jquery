@@ -1,13 +1,8 @@
 {
   "name": "viewport.jquery",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "jQuery plugin adding selectors to find and handle element relatively to viewport",
-  "licenses": [
-    {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
-    }
-  ],
+  "license" : "MIT",
   "author": "Anton Zinovyev <xog3@yandex.ru>",
   "repository": "github:xobotyi/jquery.viewport",
   "main": "viewport.jquery.js",
@@ -16,8 +11,5 @@
     "viewport",
     "jquery",
     "selector"
-  ],
-  "dependencies": {
-    "jquery": "^3.3.1"
-  }
+  ]
 }
