@@ -22,17 +22,21 @@
 
     /** @return {top, bottom, left, right, width, height, viewportWidth, viewportHeight} */
     function getRelativePosition(element, viewport) {
-        let vpRect = viewport ? viewport.getBoundingClientRect() : {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0},
-            elRect = element ? element.getBoundingClientRect() : {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0};
+        let vpRect = viewport
+                     ? (viewport.tagName === 'BODY' ? {top: 0, left: 0, width: window.innerWidth, right: window.innerWidth, height: window.innerHeight, bottom: window.innerHeight} : viewport.getBoundingClientRect())
+                     : {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0},
+            elRect = element
+                     ? element.getBoundingClientRect()
+                     : {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0};
 
         return {
             viewport,
-            viewportWidth:  vpRect.width * 1,
-            viewportHeight: vpRect.height * 1,
+            viewportWidth:  vpRect.width,
+            viewportHeight: vpRect.height,
 
             element,
-            elementWidth:  elRect.width * 1,
-            elementHeight: elRect.height * 1,
+            elementWidth:  elRect.width,
+            elementHeight: elRect.height,
 
             top:    elRect.top - vpRect.top,
             bottom: vpRect.bottom - elRect.bottom,
