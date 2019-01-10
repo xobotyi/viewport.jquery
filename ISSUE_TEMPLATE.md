@@ -1,14 +1,9 @@
-### Expected behaviour
+**Do you want to request a *feature* or report a *bug*?**
 
-### Actual behaviour
+**What is the current behavior?**
 
-### I'm seeing this behaviour on
-- OS: 
-- PHP:
-- viewport:
+**If the current behavior is a bug, please provide the steps to reproduce and if possible a minimal demo of the problem. Paste the link to your JSFiddle (https://jsfiddle.net/Luktwrdm/) or CodeSandbox (https://codesandbox.io/s/new) example below:**
 
-### Steps to reproduce, backtrace or example script
+**What is the expected behavior?**
 
-### I've checked
-- [ ] There is no similar issue from other users
-- [ ] Issue isn't fixed in `dev` branch
+**Which versions of library, and which browser / OS are affected by this issue? Did this work in previous versions of library?**
